@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PSV/PS/PD</title>
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="manifest.json" />
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js');
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js");
       });
     }
   </script>
@@ -45,26 +45,10 @@
   </div>
 
   <label for="origen">Aeropuerto de Origen:</label>
-  <select id="origen">
-    <option value="">-- Selecciona --</option>
-    <option value="SCEL">SCEL</option>
-    <option value="SCFA">SCFA</option>
-    <option value="SCDA">SCDA</option>
-    <option value="SPJC">SPJC</option>
-    <option value="SBRF">SBRF</option>
-    <!-- Agrega más después -->
-  </select>
+  <select id="origen"></select>
 
   <label for="destino">Aeropuerto de Destino:</label>
-  <select id="destino">
-    <option value="">-- Selecciona --</option>
-    <option value="SCEL">SCEL</option>
-    <option value="SCFA">SCFA</option>
-    <option value="SCDA">SCDA</option>
-    <option value="SPJC">SPJC</option>
-    <option value="SBRF">SBRF</option>
-    <!-- Agrega más después -->
-  </select>
+  <select id="destino"></select>
 
   <label for="tiempoVuelo">Tiempo de Vuelo (HH:MM):</label>
   <input type="text" id="tiempoVuelo" placeholder="ej. 07:45">
@@ -74,63 +58,115 @@
   <div class="resultado" id="resultado"></div>
 
   <script>
-    const coordenadas = {
-      SCEL: { lon: -70.785 },
-      SCFA: { lon: -70.445 }, // -70°26'25" W :contentReference[oaicite:1]{index=1}
-      SCDA: { lon: -70.1814 }, // -70°10'52" W :contentReference[oaicite:2]{index=2}
-      SPJC: { lon: -77.1144 }, // -77°06'51" W :contentReference[oaicite:3]{index=3}
-      SBRF: { lon: -34.9233 }  // -34°55'14" W :contentReference[oaicite:4]{index=4}
-      // Completar con el resto al obtener coordenadas
-    };
+const aeropuertos = {
+  SCEL: { name: "Arturo Merino Benítez (Santiago)", lon: -70.785 },
+  SCFA: { name: "Cerro Moreno (Antofagasta)", lon: -70.4314 },
+  SCDA: { name: "Diego Aracena (Iquique)", lon: -70.1814 },
+  SPJC: { name: "Jorge Chávez (Lima)", lon: -77.1144 },
+  SPHI: { name: "Capitán FAP José A. Quiñones (Chiclayo)", lon: -79.8281 },
+  SEGU: { name: "José Joaquín de Olmedo (Guayaquil)", lon: -79.8836 },
+  SEQM: { name: "Mariscal Sucre (Quito)", lon: -78.3575 },
+  SKBO: { name: "El Dorado (Bogotá)", lon: -74.1469 },
+  SKCL: { name: "Alfonso Bonilla Aragón (Cali)", lon: -76.3858 },
+  MPTO: { name: "Tocumen (Panamá)", lon: -79.3832 },
+  KMIA: { name: "Miami International", lon: -80.2906 },
+  EHAM: { name: "Schiphol (Amsterdam)", lon: 4.7639 },
+  EBBR: { name: "Brussels Airport", lon: 4.4844 },
+  EDDF: { name: "Frankfurt am Main", lon: 8.5706 },
+  GVAC: { name: "Amílcar Cabral (Sal, Cape Verde)", lon: -22.9494 },
+  SBKP: { name: "Viracopos (Campinas)", lon: -47.1345 },
+  SBRF: { name: "Guararapes (Recife)", lon: -34.9181 },
+  SBGR: { name: "Guarulhos (São Paulo)", lon: -46.4695 },
+  SAEZ: { name: "Ezeiza (Buenos Aires)", lon: -58.5358 },
+  SACO: { name: "Ingeniero Ambrosio Taravella (Córdoba)", lon: -64.208 },
+  SCIE: { name: "Carriel Sur (Concepción)", lon: -73.06 },
+  SAME: { name: "El Plumerillo (Mendoza)", lon: -68.7728 },
+  KJFK: { name: "John F. Kennedy (New York)", lon: -73.7781 },
+  KMCO: { name: "Orlando International", lon: -81.3081 },
+  KLAX: { name: "Los Angeles International", lon: -118.4081 },
+  SKRG: { name: "José María Córdova (Medellín)", lon: -75.4231 },
+  MUHA: { name: "José Martí (Havana)", lon: -82.4092 },
+  KRSW: { name: "Southwest Florida (Fort Myers)", lon: -81.7552 },
+  KPBI: { name: "Palm Beach International", lon: -80.09 },
+  KFLL: { name: "Fort Lauderdale–Hollywood", lon: -80.1527 },
+  KBOS: { name: "Logan (Boston)", lon: -71.0052 },
+  KBGR: { name: "Bangor International", lon: -68.8281 },
+  CYZX: { name: "CFB Greenwood", lon: -64.9225 },
+  CYHZ: { name: "Halifax Stanfield", lon: -63.5086 },
+  CYQM: { name: "Greater Moncton", lon: -64.6786 },
+  CYJT: { name: "Stephenville International", lon: -58.5506 },
+  CYQX: { name: "Gander International", lon: -54.5681 },
+  LPLA: { name: "Lajes Field (Azores)", lon: -28.4294 },
+  LPAZ: { name: "Santa Maria (Azores)", lon: -28.0503 },
+  LPPT: { name: "Humberto Delgado (Lisbon)", lon: -9.1359 },
+  LEMD: { name: "Adolfo Suárez Madrid–Barajas", lon: -3.5642 },
+  GCLP: { name: "Gran Canaria", lon: -15.4706 },
+  GCTS: { name: "Tenerife–South", lon: -16.5725 },
+  GMMN: { name: "Mohammed V (Casablanca)", lon: -7.5897 },
+  GOBD: { name: "Blaise Diagne (Dakar)", lon: -17.0733 },
+  GVBA: { name: "Rabil (Cape Verde)", lon: -22.6661 },
+  GVNP: { name: "Nelson Mandela (Praia, CV)", lon: -23.4833 },
+  GVSV: { name: "São Vicente Cesária Évora", lon: -25.0581 },
+  EHRD: { name: "Rotterdam The Hague", lon: 4.4372 },
+  LEVD: { name: "Valladolid Airport", lon: -4.8519 },
+};
 
-    function tiempoEnMinutos(horaStr) {
-      const [h, m] = horaStr.split(":").map(Number);
-      return h * 60 + m;
-    }
+window.addEventListener("DOMContentLoaded", () => {
+  const selOri = document.getElementById("origen");
+  const selDes = document.getElementById("destino");
+  Object.entries(aeropuertos).forEach(([code, info]) => {
+    const opt = new Option(`${code} – ${info.name}`, code);
+    selOri.add(opt.cloneNode(true));
+    selDes.add(opt);
+  });
+});
 
-    function minutosAHorasYMinutos(minutos) {
-      const h = Math.floor(minutos / 60);
-      const m = minutos % 60;
-      return `${h}h ${m}min`;
-    }
+function tiempoEnMinutos(horaStr) {
+  const [h, m] = horaStr.split(":").map(Number);
+  return h * 60 + m;
+}
 
-    function validarPSV() {
-      const tipo = parseInt(document.getElementById("tripulacion").value);
-      const ih = parseInt(document.getElementById("inicioHora").value);
-      const im = parseInt(document.getElementById("inicioMin").value);
-      const fh = parseInt(document.getElementById("finHora").value);
-      const fm = parseInt(document.getElementById("finMin").value);
-      const vueloStr = document.getElementById("tiempoVuelo").value;
-      const origen = document.getElementById("origen").value;
-      const destino = document.getElementById("destino").value;
+function minutosAHorasYMinutos(minutos) {
+  const h = Math.floor(minutos / 60);
+  const m = minutos % 60;
+  return `${h}h ${m}min`;
+}
 
-      if ([ih,im,fh,fm].some(isNaN) || !vueloStr || !origen || !destino) {
-        return document.getElementById("resultado").innerText = "⚠️ Completa todos los campos.";
-      }
+function validarPSV() {
+  const tipo = parseInt(document.getElementById("tripulacion").value);
+  const ih = parseInt(document.getElementById("inicioHora").value);
+  const im = parseInt(document.getElementById("inicioMin").value);
+  const fh = parseInt(document.getElementById("finHora").value);
+  const fm = parseInt(document.getElementById("finMin").value);
+  const vuelo = document.getElementById("tiempoVuelo").value;
+  const ori = document.getElementById("origen").value;
+  const des = document.getElementById("destino").value;
 
-      const inicioTotal = ih * 60 + im;
-      let finTotal = fh * 60 + fm;
-      if (finTotal < inicioTotal) finTotal += 1440;
+  if ([ih,im,fh,fm].some(isNaN) || !vuelo || !ori || !des) {
+    return document.getElementById("resultado").innerText = "⚠️ Completa todos los campos.";
+  }
 
-      const duracionPSV = finTotal - inicioTotal;
-      const vueloMin = tiempoEnMinutos(vueloStr);
-      const limites = {2:{hv:480,psv:720,ext:120},3:{hv:720,psv:1080,ext:0},4:{hv:960,psv:1200,ext:0}};
-      const {hv,psv,ext} = limites[tipo];
+  let inicio = ih * 60 + im;
+  let fin = fh * 60 + fm;
+  if (fin < inicio) fin += 1440;
+  const durPSV = fin - inicio;
+  const vueloMin = tiempoEnMinutos(vuelo);
+  const limites = {2:{hv:480,psv:720,ext:120},3:{hv:720,psv:1080,ext:0},4:{hv:960,psv:1200,ext:0}};
+  const {hv, psv, ext} = limites[tipo];
 
-      const deltaLong = Math.abs(coordenadas[origen].lon - coordenadas[destino].lon);
-      let ajusteDescanso = deltaLong >= 45 ? 120 + Math.floor((deltaLong - 45)/15)*30 : 0;
+  const deltaLong = Math.abs(aeropuertos[ori].lon - aeropuertos[des].lon);
+  const ajuste = deltaLong >= 45 ? 120 + Math.floor((deltaLong - 45) / 15) * 30 : 0;
 
-      let msg = `🕒 Duración Servicio: ${minutosAHorasYMinutos(duracionPSV)}\n`;
-      msg += `✈️ Tiempo de Vuelo: ${minutosAHorasYMinutos(vueloMin)}\n`;
-      msg += `🌍 ΔLongitud: ${deltaLong.toFixed(2)}°\n`;
-      if (ajusteDescanso) msg += `🛌 Ajuste Descanso: +${minutosAHorasYMinutos(ajusteDescanso)}\n`;
-      msg += `\n`;
+  let msg = `🕒 PSV: ${minutosAHorasYMinutos(durPSV)}\n`;
+  msg    += `✈️ Vuelo: ${minutosAHorasYMinutos(vueloMin)}\n`;
+  msg    += `🌍 ΔLongitud: ${deltaLong.toFixed(2)}°\n`;
+  if (ajuste) msg += `🛌 Ajuste Descanso: +${minutosAHorasYMinutos(ajuste)}\n`;
+  msg    += `\n`;
+  msg    += durPSV > psv + ext ? `❌ PSV excedido (máx. ${minutosAHorasYMinutos(psv+ext)})\n` : `✅ PSV dentro de límite\n`;
+  msg    += vueloMin > hv ? `❌ HV excedido (máx. ${minutosAHorasYMinutos(hv)})` : `✅ HV dentro de límite`;
 
-      msg += duracionPSV > psv + ext ? `❌ PSV excedido (${minutosAHorasYMinutos(psv+ext)})\n` : `✅ PSV dentro de límite\n`;
-      msg += vueloMin > hv ? `❌ HV excedido (${minutosAHorasYMinutos(hv)})` : `✅ HV dentro de límite`;
-
-      document.getElementById("resultado").innerText = msg;
-    }
+  document.getElementById("resultado").innerText = msg;
+}
   </script>
 </body>
 </html>
