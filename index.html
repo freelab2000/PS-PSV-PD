@@ -44,6 +44,22 @@
     <input type="number" id="finMin" placeholder="MM" min="0" max="59">
   </div>
 
+  <label for="origen">Aeropuerto de Origen:</label>
+  <select id="origen">
+    <option value="SCEL">SCEL</option>
+    <option value="EHAM">EHAM</option>
+    <option value="KMIA">KMIA</option>
+    <option value="EDDF">EDDF</option>
+  </select>
+
+  <label for="destino">Aeropuerto de Destino:</label>
+  <select id="destino">
+    <option value="EHAM">EHAM</option>
+    <option value="SCEL">SCEL</option>
+    <option value="KMIA">KMIA</option>
+    <option value="EDDF">EDDF</option>
+  </select>
+
   <label for="tiempoVuelo">Tiempo de Vuelo (HH:MM):</label>
   <input type="text" id="tiempoVuelo" placeholder="ej. 07:45">
 
@@ -52,6 +68,13 @@
   <div class="resultado" id="resultado"></div>
 
   <script>
+    const coordenadas = {
+      SCEL: { lon: -70.785 },
+      EHAM: { lon: 4.763 },
+      KMIA: { lon: -80.290 },
+      EDDF: { lon: 8.570 }
+    };
+
     function tiempoEnMinutos(horaStr) {
       const [h, m] = horaStr.split(":").map(Number);
       return h * 60 + m;
@@ -71,8 +94,10 @@
       const finHora = parseInt(document.getElementById("finHora").value);
       const finMin = parseInt(document.getElementById("finMin").value);
       const vuelo = document.getElementById("tiempoVuelo").value;
+      const origen = document.getElementById("origen").value;
+      const destino = document.getElementById("destino").value;
 
-      if (isNaN(inicioHora) || isNaN(inicioMin) || isNaN(finHora) || isNaN(finMin) || !vuelo) {
+      if (isNaN(inicioHora) || isNaN(inicioMin) || isNaN(finHora) || isNaN(finMin) || !vuelo || !origen || !destino) {
         document.getElementById("resultado").innerText = "⚠️ Completa todos los campos.";
         return;
       }
@@ -92,8 +117,22 @@
 
       const { hv, psv, ext } = limites[tipo];
 
+      const long1 = coordenadas[origen].lon;
+      const long2 = coordenadas[destino].lon;
+      const deltaLong = Math.abs(long1 - long2);
+
+      let ajusteDescanso = 0;
+      if (deltaLong >= 45) {
+        ajusteDescanso = 120 + Math.floor((deltaLong - 45) / 15) * 30;
+      }
+
       let mensaje = `🕒 Duración del Servicio: ${minutosAHorasYMinutos(duracionPSV)}\n`;
-      mensaje += `✈️ Tiempo de Vuelo: ${minutosAHorasYMinutos(vueloMin)}\n\n`;
+      mensaje += `✈️ Tiempo de Vuelo: ${minutosAHorasYMinutos(vueloMin)}\n`;
+      mensaje += `🌐 Diferencia de Longitud: ${deltaLong.toFixed(2)}°\n`;
+      if (ajusteDescanso > 0) {
+        mensaje += `🛌 Ajuste de Descanso: +${minutosAHorasYMinutos(ajusteDescanso)}\n`;
+      }
+      mensaje += `\n`;
 
       if (duracionPSV > (psv + ext)) {
         mensaje += `❌ Excede el máximo permitido de PSV (${minutosAHorasYMinutos(psv + ext)}).\n`;
