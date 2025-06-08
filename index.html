@@ -16,6 +16,8 @@
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     label { display: block; margin-top: 15px; }
     input, select { width: 100%; padding: 8px; margin-top: 5px; }
+    .time-group { display: flex; gap: 10px; }
+    .time-group input { width: 50%; }
     button { margin-top: 20px; padding: 10px 20px; }
     .resultado { margin-top: 25px; font-weight: bold; white-space: pre-wrap; }
   </style>
@@ -30,11 +32,17 @@
     <option value="4">4 pilotos</option>
   </select>
 
-  <label for="inicio">Inicio PSV:</label>
-  <input type="time" id="inicio">
+  <label>Inicio PSV:</label>
+  <div class="time-group">
+    <input type="number" id="inicioHora" placeholder="HH" min="0" max="23">
+    <input type="number" id="inicioMin" placeholder="MM" min="0" max="59">
+  </div>
 
-  <label for="fin">Término PSV:</label>
-  <input type="time" id="fin">
+  <label>Término PSV:</label>
+  <div class="time-group">
+    <input type="number" id="finHora" placeholder="HH" min="0" max="23">
+    <input type="number" id="finMin" placeholder="MM" min="0" max="59">
+  </div>
 
   <label for="tiempoVuelo">Tiempo de Vuelo (HH:MM):</label>
   <input type="text" id="tiempoVuelo" placeholder="ej. 07:45">
@@ -57,20 +65,23 @@
 
     function validarPSV() {
       const tipo = parseInt(document.getElementById("tripulacion").value);
-      const inicio = document.getElementById("inicio").value;
-      const fin = document.getElementById("fin").value;
+
+      const inicioHora = parseInt(document.getElementById("inicioHora").value);
+      const inicioMin = parseInt(document.getElementById("inicioMin").value);
+      const finHora = parseInt(document.getElementById("finHora").value);
+      const finMin = parseInt(document.getElementById("finMin").value);
       const vuelo = document.getElementById("tiempoVuelo").value;
 
-      if (!inicio || !fin || !vuelo) {
+      if (isNaN(inicioHora) || isNaN(inicioMin) || isNaN(finHora) || isNaN(finMin) || !vuelo) {
         document.getElementById("resultado").innerText = "⚠️ Completa todos los campos.";
         return;
       }
 
-      let inicioMin = tiempoEnMinutos(inicio);
-      let finMin = tiempoEnMinutos(fin);
-      if (finMin < inicioMin) finMin += 1440; // cruza medianoche
+      let inicioTotal = inicioHora * 60 + inicioMin;
+      let finTotal = finHora * 60 + finMin;
+      if (finTotal < inicioTotal) finTotal += 1440; // cruza medianoche
 
-      const duracionPSV = finMin - inicioMin;
+      const duracionPSV = finTotal - inicioTotal;
       const vueloMin = tiempoEnMinutos(vuelo);
 
       const limites = {
