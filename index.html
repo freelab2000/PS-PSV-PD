@@ -15,10 +15,16 @@
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
     label { display: block; margin-top: 15px; }
-    input, select { width: 100%; padding: 8px; margin-top: 5px; }
-    .time-group { display: flex; gap: 10px; }
-    .time-group input { width: 50%; }
-    button { margin-top: 20px; padding: 10px 20px; }
+    input, select { padding: 8px; }
+    .time-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 5px;
+      align-items: center;
+    }
+    select { width: 70px; }
+    button { padding: 6px 12px; }
     .resultado { margin-top: 25px; font-weight: bold; white-space: pre-wrap; }
   </style>
 </head>
@@ -34,14 +40,22 @@
 
   <label>Inicio PSV:</label>
   <div class="time-group">
-    <input type="number" id="inicioHora" placeholder="HH" min="0" max="23">
-    <input type="number" id="inicioMin" placeholder="MM" min="0" max="59">
+    <button onclick="ajustar('inicioHora', -1)">−</button>
+    <select id="inicioHora"></select>
+    <button onclick="ajustar('inicioHora', 1)">+</button>
+    <button onclick="ajustar('inicioMin', -1)">−</button>
+    <select id="inicioMin"></select>
+    <button onclick="ajustar('inicioMin', 1)">+</button>
   </div>
 
   <label>Término PSV:</label>
   <div class="time-group">
-    <input type="number" id="finHora" placeholder="HH" min="0" max="23">
-    <input type="number" id="finMin" placeholder="MM" min="0" max="59">
+    <button onclick="ajustar('finHora', -1)">−</button>
+    <select id="finHora"></select>
+    <button onclick="ajustar('finHora', 1)">+</button>
+    <button onclick="ajustar('finMin', -1)">−</button>
+    <select id="finMin"></select>
+    <button onclick="ajustar('finMin', 1)">+</button>
   </div>
 
   <label for="origen">Aeropuerto de Origen:</label>
@@ -51,7 +65,7 @@
   <select id="destino"></select>
 
   <label for="tiempoVuelo">Tiempo de Vuelo (HH:MM):</label>
-  <input type="text" id="tiempoVuelo" placeholder="ej. 07:45">
+  <input type="text" id="tiempoVuelo" placeholder="ej. 07:45" style="width: 100%;"/>
 
   <button onclick="validarPSV()">Validar</button>
 
@@ -135,7 +149,18 @@
       return 24 * 60;
     }
 
-    window.addEventListener("DOMContentLoaded", () => {
+    function llenarSelectHorasMinutos() {
+      const horas = [...Array(24).keys()].map(h => String(h).padStart(2, '0'));
+      const minutos = [...Array(60).keys()].map(m => String(m).padStart(2, '0'));
+      for (let id of ["inicioHora", "finHora"]) {
+        const sel = document.getElementById(id);
+        horas.forEach(h => sel.add(new Option(h, h)));
+      }
+      for (let id of ["inicioMin", "finMin"]) {
+        const sel = document.getElementById(id);
+        minutos.forEach(m => sel.add(new Option(m, m)));
+      }
+
       const selOri = document.getElementById("origen");
       const selDes = document.getElementById("destino");
       const sortedAirports = Object.entries(aeropuertos).sort(([a,], [b,]) => a.localeCompare(b));
@@ -144,7 +169,15 @@
         selOri.add(opt.cloneNode(true));
         selDes.add(opt);
       });
-    });
+    }
+
+    function ajustar(id, delta) {
+      const sel = document.getElementById(id);
+      const max = id.includes("Hora") ? 23 : 59;
+      let val = parseInt(sel.value || 0);
+      val = (val + delta + (max + 1)) % (max + 1);
+      sel.value = String(val).padStart(2, '0');
+    }
 
     function tiempoEnMinutos(horaStr) {
       const [h, m] = horaStr.split(":").map(Number);
@@ -201,6 +234,8 @@
 
       document.getElementById("resultado").innerText = msg;
     }
+
+    window.addEventListener("DOMContentLoaded", llenarSelectHorasMinutos);
   </script>
 </body>
 </html>
