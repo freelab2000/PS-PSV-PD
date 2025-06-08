@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora PSV - DAR 121</title>
+  <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js');
+      });
+    }
+  </script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    label { display: block; margin-top: 15px; }
+    input, select { width: 100%; padding: 8px; margin-top: 5px; }
+    button { margin-top: 20px; padding: 10px 20px; }
+    .resultado { margin-top: 25px; font-weight: bold; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Calculadora de Servicio de Vuelo (PSV)</h1>
+
+  <label for="tripulacion">Tipo de Tripulación:</label>
+  <select id="tripulacion">
+    <option value="2">2 pilotos</option>
+    <option value="3">3 pilotos</option>
+    <option value="4">4 pilotos</option>
+  </select>
+
+  <label for="inicio">Inicio del Servicio:</label>
+  <input type="time" id="inicio">
+
+  <label for="fin">Fin del Servicio:</label>
+  <input type="time" id="fin">
+
+  <label for="tiempoVuelo">Tiempo de Vuelo (HH:MM):</label>
+  <input type="text" id="tiempoVuelo" placeholder="ej. 07:45">
+
+  <button onclick="validarPSV()">Validar</button>
+
+  <div class="resultado" id="resultado"></div>
+
+  <script>
+    function tiempoEnMinutos(horaStr) {
+      const [h, m] = horaStr.split(":").map(Number);
+      return h * 60 + m;
+    }
+
+    function minutosAHorasYMinutos(minutos) {
+      const h = Math.floor(minutos / 60);
+      const m = minutos % 60;
+      return `${h}h ${m}min`;
+    }
+
+    function validarPSV() {
+      const tipo = parseInt(document.getElementById("tripulacion").value);
+      const inicio = document.getElementById("inicio").value;
+      const fin = document.getElementById("fin").value;
+      const vuelo = document.getElementById("tiempoVuelo").value;
+
+      if (!inicio || !fin || !vuelo) {
+        document.getElementById("resultado").innerText = "⚠️ Completa todos los campos.";
+        return;
+      }
+
+      let inicioMin = tiempoEnMinutos(inicio);
+      let finMin = tiempoEnMinutos(fin);
+      if (finMin < inicioMin) finMin += 1440; // cruza medianoche
+
+      const duracionPSV = finMin - inicioMin;
+      const vueloMin = tiempoEnMinutos(vuelo);
+
+      const limites = {
+        2: { hv: 480, psv: 720, ext: 120 },
+        3: { hv: 720, psv: 1080, ext: 0 },
+        4: { hv: 960, psv: 1200, ext: 0 }
+      };
+
+      const { hv, psv, ext } = limites[tipo];
+
+      let mensaje = `🕒 Duración del Servicio: ${minutosAHorasYMinutos(duracionPSV)}\n`;
+      mensaje += `✈️ Tiempo de Vuelo: ${minutosAHorasYMinutos(vueloMin)}\n\n`;
+
+      if (duracionPSV > (psv + ext)) {
+        mensaje += `❌ Excede el máximo permitido de PSV (${minutosAHorasYMinutos(psv + ext)}).\n`;
+      } else {
+        mensaje += `✅ Cumple con el límite de PSV.\n`;
+      }
+
+      if (vueloMin > hv) {
+        mensaje += `❌ Excede el límite de Tiempo de Vuelo (${minutosAHorasYMinutos(hv)}).`;
+      } else {
+        mensaje += `✅ Cumple con el Tiempo de Vuelo permitido.`;
+      }
+
+      document.getElementById("resultado").innerText = mensaje;
+    }
+  </script>
+</body>
+</html>
