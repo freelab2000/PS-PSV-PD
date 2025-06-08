@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PSV/PS/PD</title>
   <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#004080" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="icon-192x192.png" />
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
@@ -13,22 +17,47 @@
     }
   </script>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-    label { display: block; margin-top: 15px; }
-    input, select { padding: 8px; }
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+    input, select, button {
+      padding: 8px;
+      font-size: 16px;
+    }
     .time-group {
       display: flex;
       flex-wrap: wrap;
       gap: 5px;
-      margin-top: 5px;
       align-items: center;
+      margin-top: 5px;
     }
     select { width: 70px; }
     button { padding: 6px 12px; }
-    .resultado { margin-top: 25px; font-weight: bold; white-space: pre-wrap; }
+    .resultado {
+      margin-top: 25px;
+      font-weight: bold;
+      white-space: pre-wrap;
+    }
+    @media (max-width: 600px) {
+      .time-group {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      select, button {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
+
   <h1>PSV/PS/PD</h1>
 
   <label for="tripulacion">Tipo de Tripulación:</label>
@@ -73,56 +102,12 @@
 
   <script>
     const aeropuertos = {
-      SCEL: { name: "Arturo Merino Benítez (Santiago)", lon: -70.785 },
-      SCFA: { name: "Cerro Moreno (Antofagasta)", lon: -70.4314 },
-      SCDA: { name: "Diego Aracena (Iquique)", lon: -70.1814 },
-      SPJC: { name: "Jorge Chávez (Lima)", lon: -77.1144 },
-      SPHI: { name: "Capitán FAP José A. Quiñones (Chiclayo)", lon: -79.8281 },
-      SEGU: { name: "José Joaquín de Olmedo (Guayaquil)", lon: -79.8836 },
-      SEQM: { name: "Mariscal Sucre (Quito)", lon: -78.3575 },
-      SKBO: { name: "El Dorado (Bogotá)", lon: -74.1469 },
-      SKCL: { name: "Alfonso Bonilla Aragón (Cali)", lon: -76.3858 },
-      MPTO: { name: "Tocumen (Panamá)", lon: -79.3832 },
-      KMIA: { name: "Miami International", lon: -80.2906 },
-      EHAM: { name: "Schiphol (Amsterdam)", lon: 4.7639 },
-      EBBR: { name: "Brussels Airport", lon: 4.4844 },
-      EDDF: { name: "Frankfurt am Main", lon: 8.5706 },
-      GVAC: { name: "Amílcar Cabral (Sal)", lon: -22.9494 },
-      SBKP: { name: "Viracopos (Campinas)", lon: -47.1345 },
-      SBRF: { name: "Guararapes (Recife)", lon: -34.9181 },
-      SBGR: { name: "Guarulhos (São Paulo)", lon: -46.4695 },
-      SAEZ: { name: "Ezeiza (Buenos Aires)", lon: -58.5358 },
-      SACO: { name: "Córdoba", lon: -64.208 },
-      SCIE: { name: "Carriel Sur (Concepción)", lon: -73.06 },
-      SAME: { name: "Mendoza", lon: -68.7728 },
-      KJFK: { name: "John F. Kennedy (NY)", lon: -73.7781 },
-      KMCO: { name: "Orlando International", lon: -81.3081 },
-      KLAX: { name: "Los Angeles", lon: -118.4081 },
-      SKRG: { name: "Medellín", lon: -75.4231 },
-      MUHA: { name: "José Martí (Havana)", lon: -82.4092 },
-      KRSW: { name: "Fort Myers", lon: -81.7552 },
-      KPBI: { name: "Palm Beach", lon: -80.09 },
-      KFLL: { name: "Ft. Lauderdale", lon: -80.1527 },
-      KBOS: { name: "Boston Logan", lon: -71.0052 },
-      KBGR: { name: "Bangor", lon: -68.8281 },
-      CYZX: { name: "Greenwood (CA)", lon: -64.9225 },
-      CYHZ: { name: "Halifax", lon: -63.5086 },
-      CYQM: { name: "Moncton", lon: -64.6786 },
-      CYJT: { name: "Stephenville", lon: -58.5506 },
-      CYQX: { name: "Gander", lon: -54.5681 },
-      LPLA: { name: "Lajes (Azores)", lon: -28.4294 },
-      LPAZ: { name: "Santa Maria (Azores)", lon: -28.0503 },
-      LPPT: { name: "Lisboa", lon: -9.1359 },
-      LEMD: { name: "Madrid Barajas", lon: -3.5642 },
-      GCLP: { name: "Gran Canaria", lon: -15.4706 },
-      GCTS: { name: "Tenerife Sur", lon: -16.5725 },
-      GMMN: { name: "Casablanca", lon: -7.5897 },
-      GOBD: { name: "Dakar", lon: -17.0733 },
-      GVBA: { name: "Rabil", lon: -22.6661 },
-      GVNP: { name: "Praia", lon: -23.4833 },
-      GVSV: { name: "São Vicente", lon: -25.0581 },
-      EHRD: { name: "Rotterdam", lon: 4.4372 },
-      LEVD: { name: "Valladolid", lon: -4.8519 }
+      SCEL: { name: "Santiago", lon: -70.785 },
+      SCFA: { name: "Antofagasta", lon: -70.4314 },
+      SCDA: { name: "Iquique", lon: -70.1814 },
+      SPJC: { name: "Lima", lon: -77.1144 },
+      EHAM: { name: "Amsterdam", lon: 4.7639 },
+      KMIA: { name: "Miami", lon: -80.2906 }
     };
 
     const descansosPorPSV = [
@@ -139,7 +124,7 @@
       { max: 17, descanso: 19 },
       { max: 18, descanso: 20 },
       { max: 19, descanso: 22 },
-      { max: 20, descanso: 24 },
+      { max: 20, descanso: 24 }
     ];
 
     function calcularDescansoBase(psvHoras) {
@@ -160,7 +145,6 @@
         const sel = document.getElementById(id);
         minutos.forEach(m => sel.add(new Option(m, m)));
       }
-
       const selOri = document.getElementById("origen");
       const selDes = document.getElementById("destino");
       const sortedAirports = Object.entries(aeropuertos).sort(([a,], [b,]) => a.localeCompare(b));
@@ -237,5 +221,6 @@
 
     window.addEventListener("DOMContentLoaded", llenarSelectHorasMinutos);
   </script>
+
 </body>
 </html>
