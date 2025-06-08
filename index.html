@@ -9,6 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="apple-touch-icon" href="icon-192x192.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
@@ -18,18 +19,30 @@
   </script>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Inter', sans-serif;
+      background: #f5f8fa;
       padding: 20px;
       max-width: 600px;
       margin: auto;
+      color: #1a1a1a;
+    }
+    h1 {
+      text-align: center;
+      color: #004080;
+      margin-bottom: 20px;
     }
     label {
       display: block;
       margin-top: 15px;
+      font-weight: 600;
     }
-    input, select, button {
-      padding: 8px;
+    input, select {
+      padding: 10px;
       font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 100%;
+      margin-top: 5px;
     }
     .time-group {
       display: flex;
@@ -38,12 +51,30 @@
       align-items: center;
       margin-top: 5px;
     }
-    select { width: 70px; }
-    button { padding: 6px 12px; }
+    select {
+      width: 80px;
+    }
+    button {
+      padding: 10px 14px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #004080;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #0059b3;
+    }
     .resultado {
       margin-top: 25px;
       font-weight: bold;
       white-space: pre-wrap;
+      background: #e6f0ff;
+      border-left: 4px solid #004080;
+      padding: 15px;
+      border-radius: 8px;
     }
     @media (max-width: 600px) {
       .time-group {
@@ -94,7 +125,7 @@
   <select id="destino"></select>
 
   <label for="tiempoVuelo">Tiempo de Vuelo (HH:MM):</label>
-  <input type="text" id="tiempoVuelo" placeholder="ej. 07:45" style="width: 100%;"/>
+  <input type="text" id="tiempoVuelo" placeholder="ej. 07:45" />
 
   <button onclick="validarPSV()">Validar</button>
 
