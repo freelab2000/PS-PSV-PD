@@ -138,7 +138,8 @@
     window.addEventListener("DOMContentLoaded", () => {
       const selOri = document.getElementById("origen");
       const selDes = document.getElementById("destino");
-      Object.entries(aeropuertos).forEach(([code, info]) => {
+      const sortedAirports = Object.entries(aeropuertos).sort(([a,], [b,]) => a.localeCompare(b));
+      sortedAirports.forEach(([code, info]) => {
         const opt = new Option(`${code} – ${info.name}`, code);
         selOri.add(opt.cloneNode(true));
         selDes.add(opt);
@@ -166,7 +167,7 @@
       const ori = document.getElementById("origen").value;
       const des = document.getElementById("destino").value;
 
-      if ([ih,im,fh,fm].some(isNaN) || !vuelo || !ori || !des) {
+      if ([ih, im, fh, fm].some(isNaN) || !vuelo || !ori || !des) {
         return document.getElementById("resultado").innerText = "⚠️ Completa todos los campos.";
       }
 
@@ -176,8 +177,8 @@
 
       const durPSV = fin - inicio;
       const vueloMin = tiempoEnMinutos(vuelo);
-      const limites = {2:{hv:480,psv:720,ext:120},3:{hv:720,psv:1080,ext:0},4:{hv:960,psv:1200,ext:0}};
-      const {hv, psv, ext} = limites[tipo];
+      const limites = { 2: { hv: 480, psv: 720, ext: 120 }, 3: { hv: 720, psv: 1080, ext: 0 }, 4: { hv: 960, psv: 1200, ext: 0 } };
+      const { hv, psv, ext } = limites[tipo];
 
       const deltaLong = Math.abs(aeropuertos[ori].lon - aeropuertos[des].lon);
       const ajusteDescanso = deltaLong >= 45 ? 120 + Math.floor((deltaLong - 45) / 15) * 30 : 0;
@@ -189,10 +190,13 @@
       msg += `✈️ Vuelo: ${minutosAHorasYMinutos(vueloMin)}\n`;
       msg += `🌍 ΔLongitud: ${deltaLong.toFixed(2)}°\n`;
       msg += `🛌 Descanso mínimo base: ${minutosAHorasYMinutos(descansoBase)}\n`;
-      if (ajusteDescanso) msg += `🛌 Ajuste por longitud: +${minutosAHorasYMinutos(ajusteDescanso)}\n`;
+      if (ajusteDescanso) {
+        msg += `🛌 Ajuste por longitud: +${minutosAHorasYMinutos(ajusteDescanso)}\n`;
+        msg += `✅ Se ha agregado el período de descanso adicional establecido por cambio de longitud geográfica\n`;
+      }
       msg += `🛌 Descanso total requerido: ${minutosAHorasYMinutos(descansoTotal)}\n\n`;
 
-      msg += durPSV > psv + ext ? `❌ PSV excedido (máx. ${minutosAHorasYMinutos(psv+ext)})\n` : `✅ PSV dentro de límite\n`;
+      msg += durPSV > psv + ext ? `❌ PSV excedido (máx. ${minutosAHorasYMinutos(psv + ext)})\n` : `✅ PSV dentro de límite\n`;
       msg += vueloMin > hv ? `❌ HV excedido (máx. ${minutosAHorasYMinutos(hv)})` : `✅ HV dentro de límite`;
 
       document.getElementById("resultado").innerText = msg;
