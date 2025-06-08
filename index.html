@@ -46,18 +46,24 @@
 
   <label for="origen">Aeropuerto de Origen:</label>
   <select id="origen">
+    <option value="">-- Selecciona --</option>
     <option value="SCEL">SCEL</option>
-    <option value="EHAM">EHAM</option>
-    <option value="KMIA">KMIA</option>
-    <option value="EDDF">EDDF</option>
+    <option value="SCFA">SCFA</option>
+    <option value="SCDA">SCDA</option>
+    <option value="SPJC">SPJC</option>
+    <option value="SBRF">SBRF</option>
+    <!-- Agrega más después -->
   </select>
 
   <label for="destino">Aeropuerto de Destino:</label>
   <select id="destino">
-    <option value="EHAM">EHAM</option>
+    <option value="">-- Selecciona --</option>
     <option value="SCEL">SCEL</option>
-    <option value="KMIA">KMIA</option>
-    <option value="EDDF">EDDF</option>
+    <option value="SCFA">SCFA</option>
+    <option value="SCDA">SCDA</option>
+    <option value="SPJC">SPJC</option>
+    <option value="SBRF">SBRF</option>
+    <!-- Agrega más después -->
   </select>
 
   <label for="tiempoVuelo">Tiempo de Vuelo (HH:MM):</label>
@@ -70,9 +76,11 @@
   <script>
     const coordenadas = {
       SCEL: { lon: -70.785 },
-      EHAM: { lon: 4.763 },
-      KMIA: { lon: -80.290 },
-      EDDF: { lon: 8.570 }
+      SCFA: { lon: -70.445 }, // -70°26'25" W :contentReference[oaicite:1]{index=1}
+      SCDA: { lon: -70.1814 }, // -70°10'52" W :contentReference[oaicite:2]{index=2}
+      SPJC: { lon: -77.1144 }, // -77°06'51" W :contentReference[oaicite:3]{index=3}
+      SBRF: { lon: -34.9233 }  // -34°55'14" W :contentReference[oaicite:4]{index=4}
+      // Completar con el resto al obtener coordenadas
     };
 
     function tiempoEnMinutos(horaStr) {
@@ -88,65 +96,40 @@
 
     function validarPSV() {
       const tipo = parseInt(document.getElementById("tripulacion").value);
-
-      const inicioHora = parseInt(document.getElementById("inicioHora").value);
-      const inicioMin = parseInt(document.getElementById("inicioMin").value);
-      const finHora = parseInt(document.getElementById("finHora").value);
-      const finMin = parseInt(document.getElementById("finMin").value);
-      const vuelo = document.getElementById("tiempoVuelo").value;
+      const ih = parseInt(document.getElementById("inicioHora").value);
+      const im = parseInt(document.getElementById("inicioMin").value);
+      const fh = parseInt(document.getElementById("finHora").value);
+      const fm = parseInt(document.getElementById("finMin").value);
+      const vueloStr = document.getElementById("tiempoVuelo").value;
       const origen = document.getElementById("origen").value;
       const destino = document.getElementById("destino").value;
 
-      if (isNaN(inicioHora) || isNaN(inicioMin) || isNaN(finHora) || isNaN(finMin) || !vuelo || !origen || !destino) {
-        document.getElementById("resultado").innerText = "⚠️ Completa todos los campos.";
-        return;
+      if ([ih,im,fh,fm].some(isNaN) || !vueloStr || !origen || !destino) {
+        return document.getElementById("resultado").innerText = "⚠️ Completa todos los campos.";
       }
 
-      let inicioTotal = inicioHora * 60 + inicioMin;
-      let finTotal = finHora * 60 + finMin;
-      if (finTotal < inicioTotal) finTotal += 1440; // cruza medianoche
+      const inicioTotal = ih * 60 + im;
+      let finTotal = fh * 60 + fm;
+      if (finTotal < inicioTotal) finTotal += 1440;
 
       const duracionPSV = finTotal - inicioTotal;
-      const vueloMin = tiempoEnMinutos(vuelo);
+      const vueloMin = tiempoEnMinutos(vueloStr);
+      const limites = {2:{hv:480,psv:720,ext:120},3:{hv:720,psv:1080,ext:0},4:{hv:960,psv:1200,ext:0}};
+      const {hv,psv,ext} = limites[tipo];
 
-      const limites = {
-        2: { hv: 480, psv: 720, ext: 120 },
-        3: { hv: 720, psv: 1080, ext: 0 },
-        4: { hv: 960, psv: 1200, ext: 0 }
-      };
+      const deltaLong = Math.abs(coordenadas[origen].lon - coordenadas[destino].lon);
+      let ajusteDescanso = deltaLong >= 45 ? 120 + Math.floor((deltaLong - 45)/15)*30 : 0;
 
-      const { hv, psv, ext } = limites[tipo];
+      let msg = `🕒 Duración Servicio: ${minutosAHorasYMinutos(duracionPSV)}\n`;
+      msg += `✈️ Tiempo de Vuelo: ${minutosAHorasYMinutos(vueloMin)}\n`;
+      msg += `🌍 ΔLongitud: ${deltaLong.toFixed(2)}°\n`;
+      if (ajusteDescanso) msg += `🛌 Ajuste Descanso: +${minutosAHorasYMinutos(ajusteDescanso)}\n`;
+      msg += `\n`;
 
-      const long1 = coordenadas[origen].lon;
-      const long2 = coordenadas[destino].lon;
-      const deltaLong = Math.abs(long1 - long2);
+      msg += duracionPSV > psv + ext ? `❌ PSV excedido (${minutosAHorasYMinutos(psv+ext)})\n` : `✅ PSV dentro de límite\n`;
+      msg += vueloMin > hv ? `❌ HV excedido (${minutosAHorasYMinutos(hv)})` : `✅ HV dentro de límite`;
 
-      let ajusteDescanso = 0;
-      if (deltaLong >= 45) {
-        ajusteDescanso = 120 + Math.floor((deltaLong - 45) / 15) * 30;
-      }
-
-      let mensaje = `🕒 Duración del Servicio: ${minutosAHorasYMinutos(duracionPSV)}\n`;
-      mensaje += `✈️ Tiempo de Vuelo: ${minutosAHorasYMinutos(vueloMin)}\n`;
-      mensaje += `🌐 Diferencia de Longitud: ${deltaLong.toFixed(2)}°\n`;
-      if (ajusteDescanso > 0) {
-        mensaje += `🛌 Ajuste de Descanso: +${minutosAHorasYMinutos(ajusteDescanso)}\n`;
-      }
-      mensaje += `\n`;
-
-      if (duracionPSV > (psv + ext)) {
-        mensaje += `❌ Excede el máximo permitido de PSV (${minutosAHorasYMinutos(psv + ext)}).\n`;
-      } else {
-        mensaje += `✅ Cumple con el límite de PSV.\n`;
-      }
-
-      if (vueloMin > hv) {
-        mensaje += `❌ Excede el límite de Tiempo de Vuelo (${minutosAHorasYMinutos(hv)}).`;
-      } else {
-        mensaje += `✅ Cumple con el Tiempo de Vuelo permitido.`;
-      }
-
-      document.getElementById("resultado").innerText = mensaje;
+      document.getElementById("resultado").innerText = msg;
     }
   </script>
 </body>
