@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -204,7 +205,10 @@ function calcularProximoInicioDinamico() {
   let h = Math.floor((totalMin % 1440) / 60);
   let m = totalMin % 60;
 
+  
+  const descansoTexto = `${Math.floor(descanso/60)}h ${("0"+(descanso%60)).slice(-2)}min`;
   document.getElementById("proximoInicio").innerHTML =
+    "🕐 Próximo PSV permitido a partir de: <strong>" + ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2) + "</strong><br>🛌 Período de descanso requerido: <strong>" + descansoTexto + "</strong>";
     "🕐 Próximo PSV permitido a partir de: <strong>" + ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2) + "</strong> (descanso automático según duración PSV)";
 }
 
@@ -314,7 +318,10 @@ function calcularTiemposVuelo() {
   let h = Math.floor((totalMin % 1440) / 60);
   let m = totalMin % 60;
 
+  
+  const descansoTexto = `${Math.floor(descanso/60)}h ${("0"+(descanso%60)).slice(-2)}min`;
   document.getElementById("proximoInicio").innerHTML =
+    "🕐 Próximo PSV permitido a partir de: <strong>" + ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2) + "</strong><br>🛌 Período de descanso requerido: <strong>" + descansoTexto + "</strong>";
     "🕐 Próximo PSV permitido a partir de: <strong>" + ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2) + "</strong>";
 }
 window.onload = function() {
@@ -326,7 +333,7 @@ window.onload = function() {
   }
   for (let i = 0; i < 60; i++) {
     document.querySelectorAll("select.time").forEach(sel => {
-      if (sel.options.length < 36 && sel.id.includes("Min")) sel.add(new Option(("0"+i).slice(-2), i));
+      if (sel.id.includes("Min")) sel.add(new Option(("0"+i).slice(-2), i));
     });
   }
 };
