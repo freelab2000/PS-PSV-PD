@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PSV/PS/PD</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#004080" />
@@ -60,13 +60,20 @@
     }
     .resultado {
       margin-top: 25px;
-      font-weight: bold;
+      background: #e8f1fd;
+      border-left: 6px solid #004080;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      font-size: 16px;
+      line-height: 1.6;
+      color: #1a1a1a;
       white-space: pre-wrap;
-      background: #e6f0ff;
-      border-left: 4px solid #004080;
-      padding: 15px;
-      border-radius: 8px;
     }
+    .resultado .ok { color: #2e7d32; font-weight: bold; }
+    .resultado .error { color: #d32f2f; font-weight: bold; }
+    .resultado .info { color: #004080; font-weight: 500; }
+    .resultado .section { margin-top: 12px; }
     @media (max-width: 600px) {
       .time-group {
         flex-direction: column;
@@ -82,7 +89,6 @@
 
 <h1>PSV/PS/PD</h1>
 
-<!-- FORMULARIO -->
 <label for="tripulacion">Tipo de Tripulación:</label>
 <select id="tripulacion">
   <option value="2">2 pilotos</option>
@@ -124,6 +130,7 @@
 <div class="resultado" id="resultado"></div>
 
 <script>
+
 const aeropuertos = {
   SCEL: { name: "Santiago", lon: -70.785 },
   SCFA: { name: "Antofagasta", lon: -70.4314 },
@@ -163,7 +170,6 @@ const aeropuertos = {
   EHAM: { name: "Amsterdam", lon: 4.7639 },
   EBBR: { name: "Bruselas", lon: 4.4844 },
   EDDF: { name: "Frankfurt", lon: 8.5706 },
-  GVBA: { name: "Boavista", lon: -22.803 },
   SAEZ: { name: "Buenos Aires", lon: -58.5378 },
   SAME: { name: "Mendoza", lon: -68.7967 },
   SACO: { name: "Córdoba", lon: -64.208 },
@@ -237,7 +243,8 @@ function validarPSV() {
   const vuelo = document.getElementById("tiempoVuelo").value;
   const ori = document.getElementById("origen").value;
   const des = document.getElementById("destino").value;
-  if ([ih, im, fh, fm].some(isNaN) || !vuelo || !ori || !des) return document.getElementById("resultado").innerText = "⚠️ Completa todos los campos.";
+  if ([ih, im, fh, fm].some(isNaN) || !vuelo || !ori || !des)
+    return document.getElementById("resultado").innerText = "⚠️ Completa todos los campos.";
 
   let inicio = ih * 60 + im;
   let fin = fh * 60 + fm;
@@ -254,38 +261,32 @@ function validarPSV() {
   const descansoBase = calcularDescansoBase(Math.ceil(durPSV / 60));
   const descansoTotal = descansoBase + ajusteDescanso;
 
-  let msg = `🕒 PSV: ${minutosAHorasYMinutos(durPSV)}
-`;
-  msg += `✈️ Vuelo: ${minutosAHorasYMinutos(vueloMin)}
-`;
-  msg += `🌍 ΔLongitud: ${deltaLong.toFixed(2)}°
-`;
-  msg += `🛌 Descanso mínimo base: ${minutosAHorasYMinutos(descansoBase)}
-`;
+  let msg = `🕒 PSV: ${minutosAHorasYMinutos(durPSV)}\n`;
+  msg += `✈️ Vuelo: ${minutosAHorasYMinutos(vueloMin)}\n`;
+  msg += `🌍 ΔLongitud: ${deltaLong.toFixed(2)}°\n`;
+  msg += `🛌 Descanso mínimo base: ${minutosAHorasYMinutos(descansoBase)}\n`;
   if (ajusteDescanso) {
-    msg += `🛌 Ajuste por longitud: +${minutosAHorasYMinutos(ajusteDescanso)}
-`;
-    msg += `✅ Se ha agregado el período de descanso adicional establecido por cambio de longitud geográfica
-`;
+    msg += `🛌 Ajuste por longitud: +${minutosAHorasYMinutos(ajusteDescanso)}\n`;
+    msg += `✅ Se ha agregado el período de descanso adicional establecido por cambio de longitud geográfica\n`;
   }
-  msg += `🛌 Descanso total requerido: ${minutosAHorasYMinutos(descansoTotal)}
-
-`;
+  msg += `🛌 Descanso total requerido: ${minutosAHorasYMinutos(descansoTotal)}\n\n`;
 
   if (nocturno && durPSV > (noct || psv)) {
-    msg += `❌ Restricción nocturna activa: PSV no puede exceder ${minutosAHorasYMinutos(noct || psv)}
-`;
+    msg += `❌ Restricción nocturna activa: PSV no puede exceder ${minutosAHorasYMinutos(noct || psv)}\n`;
   } else {
-    msg += durPSV > (psv + (ext || 0)) ? `❌ PSV excedido (máx. ${minutosAHorasYMinutos(psv + (ext || 0))})
-` : `✅ PSV dentro de límite
-`;
+    msg += durPSV > (psv + (ext || 0)) ? `❌ PSV excedido (máx. ${minutosAHorasYMinutos(psv + (ext || 0))})\n` : `✅ PSV dentro de límite\n`;
   }
 
   msg += vueloMin > hv ? `❌ HV excedido (máx. ${minutosAHorasYMinutos(hv)})` : `✅ HV dentro de límite`;
-  document.getElementById("resultado").innerText = msg;
+  document.getElementById("resultado").innerHTML = msg
+    .replace(/✅/g, '<span class="ok">✅</span>')
+    .replace(/❌/g, '<span class="error">❌</span>')
+    .replace(/🛌|✈️|🕒|🌍|📘/g, '<span class="info">$&</span>')
+    .replace(/\n/g, '<br>');
 }
 
 window.addEventListener("DOMContentLoaded", llenarSelectHorasMinutos);
+
 </script>
 
 </body>
