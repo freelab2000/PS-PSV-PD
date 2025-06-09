@@ -58,36 +58,33 @@
     button:hover {
       background-color: #0059b3;
     }
-    
-.resultado {
-  margin-top: 30px;
-  padding: 20px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  font-size: 16px;
-  line-height: 1.6;
-  border-left: 5px solid #004080;
-}
-.resultado span.ok {
-  display: inline-block;
-  color: #2e7d32;
-  font-weight: bold;
-}
-.resultado span.error {
-  display: inline-block;
-  color: #d32f2f;
-  font-weight: bold;
-}
-.resultado span.info {
-  display: inline-block;
-  color: #004080;
-  font-weight: 500;
-}
-
+    .resultado {
+      margin-top: 30px;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      font-size: 16px;
+      line-height: 1.6;
+      border-left: 5px solid #004080;
+    }
+    .resultado .ok { color: #2e7d32; font-weight: bold; }
     .resultado .error { color: #d32f2f; font-weight: bold; }
     .resultado .info { color: #004080; font-weight: 500; }
-    .resultado .section { margin-top: 12px; }
+    .bitacora-block {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .bitacora-block > div {
+      flex: 1;
+    }
+    input[readonly] {
+      background: #f0f0f0;
+      text-align: center;
+      font-weight: bold;
+    }
     @media (max-width: 600px) {
       .time-group {
         flex-direction: column;
@@ -100,34 +97,49 @@
   </style>
 </head>
 <body>
-
 <h1>PSV/PS/PD</h1>
 
-<label for="tripulacion">Tipo de Tripulación:</label>
-<select id="tripulacion">
-  <option value="2">2 pilotos</option>
-  <option value="3">3 pilotos</option>
-  <option value="4">4 pilotos</option>
-</select>
-
-<label>Inicio PSV:</label>
-<div class="time-group">
-  <button onclick="ajustar('inicioHora', -1)">−</button>
-  <select id="inicioHora" class="time"></select>
-  <button onclick="ajustar('inicioHora', 1)">+</button>
-  <button onclick="ajustar('inicioMin', -1)">−</button>
-  <select id="inicioMin" class="time"></select>
-  <button onclick="ajustar('inicioMin', 1)">+</button>
+<!-- BLOCK Y AIR TIME -->
+<div class="bitacora-block">
+  <div>
+    <label>Inicio Block</label>
+    <div class="time-group">
+      <select id="blockInicioHora" class="time"></select> :
+      <select id="blockInicioMin" class="time"></select>
+    </div>
+  </div>
+  <div>
+    <label>Fin Block</label>
+    <div class="time-group">
+      <select id="blockFinHora" class="time"></select> :
+      <select id="blockFinMin" class="time"></select>
+    </div>
+  </div>
+  <div>
+    <label>Tiempo Vuelo (Block+30)</label>
+    <input id="blockComputed" readonly />
+  </div>
 </div>
 
-<label>Término PSV:</label>
-<div class="time-group">
-  <button onclick="ajustar('finHora', -1)">−</button>
-  <select id="finHora" class="time"></select>
-  <button onclick="ajustar('finHora', 1)">+</button>
-  <button onclick="ajustar('finMin', -1)">−</button>
-  <select id="finMin" class="time"></select>
-  <button onclick="ajustar('finMin', 1)">+</button>
+<div class="bitacora-block">
+  <div>
+    <label>Inicio Air</label>
+    <div class="time-group">
+      <select id="airInicioHora" class="time"></select> :
+      <select id="airInicioMin" class="time"></select>
+    </div>
+  </div>
+  <div>
+    <label>Fin Air</label>
+    <div class="time-group">
+      <select id="airFinHora" class="time"></select> :
+      <select id="airFinMin" class="time"></select>
+    </div>
+  </div>
+  <div>
+    <label>Air Time</label>
+    <input id="airComputed" readonly />
+  </div>
 </div>
 
 <label for="origen">Aeropuerto de Origen:</label>
@@ -136,172 +148,131 @@
 <label for="destino">Aeropuerto de Destino:</label>
 <select id="destino"></select>
 
-<label for="tiempoVuelo">Tiempo de Vuelo (HH:MM):</label>
-<input type="text" id="tiempoVuelo" placeholder="ej. 07:45" />
+<label>Inicio PSV:</label>
+<div class="time-group">
+  <select id="inicioHora" class="time"></select>
+  <select id="inicioMin" class="time"></select>
+</div>
+
+<label>Término PSV:</label>
+<div class="time-group">
+  <select id="finHora" class="time"></select>
+  <select id="finMin" class="time"></select>
+</div>
+
+<label for="tripulacion">Tipo de Tripulación:</label>
+<select id="tripulacion">
+  <option value="2">2 pilotos</option>
+  <option value="3">3 pilotos</option>
+  <option value="4">4 pilotos</option>
+</select>
 
 <button onclick="validarPSV()">Validar</button>
 
-<div class="resultado" id="resultado"></div>
+<div class="resultado" id="resultado">
+  <p class="info">Nota: Al Block Time se le agregan 30 minutos para el cálculo del período de descanso.</p>
+  <p class="info">Hora estimada para iniciar próximo PSV = Fin Block Time + 30 min + período de descanso.</p>
+  <div id="proximoInicio" class="info" style="margin-top:10px;"></div>
+</div>
 
 <script>
-
-const aeropuertos = {
-  SCEL: { name: "Santiago", lon: -70.785 },
-  SCFA: { name: "Antofagasta", lon: -70.4314 },
-  SCDA: { name: "Iquique", lon: -70.1814 },
-  SPJC: { name: "Lima", lon: -77.1144 },
-  SPHI: { name: "Chiclayo", lon: -79.8281 },
-  SEGU: { name: "Guayaquil", lon: -79.8836 },
-  SEQM: { name: "Quito", lon: -78.356 },
-  SKBO: { name: "Bogotá", lon: -74.1469 },
-  SKCL: { name: "Cali", lon: -76.3814 },
-  MPTO: { name: "Tocumen", lon: -79.3833 },
-  KMIA: { name: "Miami", lon: -80.2906 },
-  KJFK: { name: "New York JFK", lon: -73.7781 },
-  KMCO: { name: "Orlando", lon: -81.3089 },
-  KLAX: { name: "Los Angeles", lon: -118.4081 },
-  KRSW: { name: "Fort Myers", lon: -81.7551 },
-  KPBI: { name: "Palm Beach", lon: -80.0909 },
-  KFLL: { name: "Fort Lauderdale", lon: -80.1449 },
-  KBOS: { name: "Boston", lon: -71.0052 },
-  KBGR: { name: "Bangor", lon: -68.8281 },
-  CYZX: { name: "Greenwood", lon: -64.917 },
-  CYHZ: { name: "Halifax", lon: -63.5167 },
-  CYQM: { name: "Moncton", lon: -64.6786 },
-  CYJT: { name: "Stephenville", lon: -58.5500 },
-  CYQX: { name: "Gander", lon: -54.5644 },
-  LPLA: { name: "Lajes", lon: -28.4294 },
-  LPAZ: { name: "Santa Maria", lon: -28.0483 },
-  LPPT: { name: "Lisboa", lon: -9.1281 },
-  LEMD: { name: "Madrid", lon: -3.5668 },
-  GCLP: { name: "Gran Canaria", lon: -15.3846 },
-  GCTS: { name: "Tenerife Sur", lon: -16.5725 },
-  GMMN: { name: "Casablanca", lon: -7.5899 },
-  GOBD: { name: "Dakar", lon: -17.0733 },
-  GVBA: { name: "Boa Vista", lon: -22.8016 },
-  GVNP: { name: "Praia", lon: -23.4847 },
-  GVSV: { name: "São Vicente", lon: -25.0566 },
-  EHAM: { name: "Amsterdam", lon: 4.7639 },
-  EBBR: { name: "Bruselas", lon: 4.4844 },
-  EDDF: { name: "Frankfurt", lon: 8.5706 },
-  SAEZ: { name: "Buenos Aires", lon: -58.5378 },
-  SAME: { name: "Mendoza", lon: -68.7967 },
-  SACO: { name: "Córdoba", lon: -64.208 },
-  SBKP: { name: "Campinas", lon: -47.1344 },
-  SBRF: { name: "Recife", lon: -34.9156 },
-  SBGR: { name: "Guarulhos", lon: -46.4695 },
-  SCIE: { name: "Concepción", lon: -73.0606 },
-  EHRD: { name: "Rotterdam", lon: 4.4372 },
-  LEVD: { name: "Valladolid", lon: -4.8519 }
-};
-
-const descansosPorPSV = [
-  { max: 7, descanso: 10 }, { max: 8, descanso: 12 }, { max: 9, descanso: 13 },
-  { max: 10, descanso: 14 }, { max: 11, descanso: 15 }, { max: 12, descanso: 15 },
-  { max: 13, descanso: 15 }, { max: 14, descanso: 17 }, { max: 15, descanso: 17 },
-  { max: 16, descanso: 18 }, { max: 17, descanso: 19 }, { max: 18, descanso: 20 },
-  { max: 19, descanso: 22 }, { max: 20, descanso: 24 }
-];
-
-function ajustar(id, delta) {
-  const sel = document.getElementById(id);
-  const max = id.includes("Hora") ? 23 : 59;
-  let val = parseInt(sel.value || 0);
-  val = (val + delta + (max + 1)) % (max + 1);
-  sel.value = String(val).padStart(2, '0');
+function validarPSV() {
+  calcularProximoInicioDinamico();
 }
 
-function llenarSelectHorasMinutos() {
-  const horas = [...Array(24).keys()].map(h => String(h).padStart(2, '0'));
-  const minutos = [...Array(60).keys()].map(m => String(m).padStart(2, '0'));
-  for (let id of ["inicioHora", "finHora"]) {
-    const sel = document.getElementById(id);
-    horas.forEach(h => sel.add(new Option(h, h)));
-  }
-  for (let id of ["inicioMin", "finMin"]) {
-    const sel = document.getElementById(id);
-    minutos.forEach(m => sel.add(new Option(m, m)));
-  }
-  const selOri = document.getElementById("origen");
-  const selDes = document.getElementById("destino");
-  Object.entries(aeropuertos).sort(([a], [b]) => a.localeCompare(b)).forEach(([code, info]) => {
-    const opt = new Option(`${code} – ${info.name}`, code);
-    selOri.add(opt.cloneNode(true));
-    selDes.add(opt);
+function calcularProximoInicioDinamico() {
+  let iniHora = parseInt(document.getElementById("inicioHora").value || 0);
+  let iniMin = parseInt(document.getElementById("inicioMin").value || 0);
+  let finHora = parseInt(document.getElementById("finHora").value || 0);
+  let finMin = parseInt(document.getElementById("finMin").value || 0);
+
+  let inicio = iniHora * 60 + iniMin;
+  let fin = finHora * 60 + finMin;
+  if (fin < inicio) fin += 1440;
+
+  let duracion = fin - inicio;
+  let descanso = 720;
+  if (duracion <= 300) descanso = 720;
+  else if (duracion <= 480) descanso = 840;
+  else if (duracion <= 600) descanso = 960;
+  else descanso = 1080;
+
+  let blockFinHora = parseInt(document.getElementById("blockFinHora").value || 0);
+  let blockFinMin = parseInt(document.getElementById("blockFinMin").value || 0);
+
+  let totalMin = blockFinHora * 60 + blockFinMin + 30 + descanso;
+  let h = Math.floor((totalMin % 1440) / 60);
+  let m = totalMin % 60;
+
+  document.getElementById("proximoInicio").innerHTML =
+    "🕐 Próximo PSV permitido a partir de: <strong>" + ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2) + "</strong> (descanso automático según duración PSV)";
+}
+const aeropuertos = [
+  { codigo: "CYHZ", nombre: "Halifax", lon: -63.5167 },
+  { codigo: "CYJT", nombre: "Stephenville", lon: -58.5539 },
+  { codigo: "CYQM", nombre: "Moncton", lon: -64.6786 },
+  { codigo: "CYQX", nombre: "Gander", lon: -54.5681 },
+  { codigo: "CYZX", nombre: "Greenwood", lon: -64.9225 },
+  { codigo: "EBBR", nombre: "Bruselas", lon: 4.4844 },
+  { codigo: "EDDF", nombre: "Frankfurt", lon: 8.5706 },
+  { codigo: "EHAM", nombre: "Amsterdam", lon: 4.7639 },
+  { codigo: "EHRD", nombre: "Rotterdam", lon: 4.4372 },
+  { codigo: "GCLP", nombre: "Gran Canaria", lon: -15.3846 },
+  { codigo: "GCTS", nombre: "Tenerife Sur", lon: -16.5725 },
+  { codigo: "GMMN", nombre: "Casablanca", lon: -7.5899 },
+  { codigo: "GOBD", nombre: "Dakar", lon: -17.0739 },
+  { codigo: "GVAC", nombre: "Sal", lon: -22.9494 },
+  { codigo: "GVBA", nombre: "Boa Vista", lon: -24.2847 },
+  { codigo: "GVNP", nombre: "Praia", lon: -23.4831 },
+  { codigo: "GVSV", nombre: "São Vicente", lon: -25.0498 },
+  { codigo: "KBGR", nombre: "Bangor", lon: -68.8281 },
+  { codigo: "KBOS", nombre: "Boston", lon: -71.0052 },
+  { codigo: "KFLL", nombre: "Fort Lauderdale", lon: -80.1527 },
+  { codigo: "KJFK", nombre: "New York", lon: -73.7781 },
+  { codigo: "KLAX", nombre: "Los Angeles", lon: -118.4085 },
+  { codigo: "KMCO", nombre: "Orlando", lon: -81.3089 },
+  { codigo: "KMIA", nombre: "Miami", lon: -80.2906 },
+  { codigo: "KPBI", nombre: "Palm Beach", lon: -80.0906 },
+  { codigo: "KRSW", nombre: "Fort Myers", lon: -81.7552 },
+  { codigo: "LEMD", nombre: "Madrid", lon: -3.5695 },
+  { codigo: "LEVD", nombre: "Valladolid", lon: -4.8519 },
+  { codigo: "LPAZ", nombre: "Santa Maria", lon: -28.0464 },
+  { codigo: "LPLA", nombre: "Lajes", lon: -28.4294 },
+  { codigo: "LPPT", nombre: "Lisboa", lon: -9.1359 },
+  { codigo: "MPTO", nombre: "Panamá", lon: -79.3832 },
+  { codigo: "MUHA", nombre: "La Habana", lon: -82.4091 },
+  { codigo: "SACO", nombre: "Córdoba", lon: -64.208 },
+  { codigo: "SAEZ", nombre: "Buenos Aires", lon: -58.5358 },
+  { codigo: "SAME", nombre: "Mendoza", lon: -68.7958 },
+  { codigo: "SBGR", nombre: "Sao Paulo", lon: -46.4695 },
+  { codigo: "SBKP", nombre: "Campinas", lon: -47.1344 },
+  { codigo: "SBRF", nombre: "Recife", lon: -34.9182 },
+  { codigo: "SCDA", nombre: "Iquique", lon: -70.1813 },
+  { codigo: "SCEL", nombre: "Santiago", lon: -70.7938 },
+  { codigo: "SCFA", nombre: "Antofagasta", lon: -70.4372 },
+  { codigo: "SCIE", nombre: "Concepción", lon: -73.0606 },
+  { codigo: "SEGU", nombre: "Guayaquil", lon: -79.8801 },
+  { codigo: "SEQM", nombre: "Quito", lon: -78.4894 },
+  { codigo: "SKBO", nombre: "Bogotá", lon: -74.1469 },
+  { codigo: "SKCL", nombre: "Cali", lon: -76.3853 },
+  { codigo: "SKRG", nombre: "Medellín", lon: -75.4372 },
+  { codigo: "SPHI", nombre: "Chiclayo", lon: -79.8281 },
+  { codigo: "SPJC", nombre: "Lima", lon: -77.1143 },
+];
+
+function cargarAeropuertos() {
+  const origen = document.getElementById("origen");
+  const destino = document.getElementById("destino");
+  aeropuertos.forEach(a => {
+    const opt1 = new Option(`${a.codigo} – ${a.nombre}`, a.codigo);
+    const opt2 = new Option(`${a.codigo} – ${a.nombre}`, a.codigo);
+    origen.add(opt1); destino.add(opt2);
   });
 }
 
-function tiempoEnMinutos(horaStr) {
-  const [h, m] = horaStr.split(":").map(Number);
-  return h * 60 + m;
-}
-
-function minutosAHorasYMinutos(min) {
-  const h = Math.floor(min / 60);
-  return `${h}h ${min % 60}min`;
-}
-
-function calcularDescansoBase(horas) {
-  for (let regla of descansosPorPSV) {
-    if (horas <= regla.max) return regla.descanso * 60;
-  }
-  return 24 * 60;
-}
-
-function validarPSV() {
-  const tipo = parseInt(document.getElementById("tripulacion").value);
-  const ih = parseInt(document.getElementById("inicioHora").value);
-  const im = parseInt(document.getElementById("inicioMin").value);
-  const fh = parseInt(document.getElementById("finHora").value);
-  const fm = parseInt(document.getElementById("finMin").value);
-  const vuelo = document.getElementById("tiempoVuelo").value;
-  const ori = document.getElementById("origen").value;
-  const des = document.getElementById("destino").value;
-  if ([ih, im, fh, fm].some(isNaN) || !vuelo || !ori || !des)
-    return document.getElementById("resultado").innerText = "⚠️ Completa todos los campos.";
-
-  let inicio = ih * 60 + im;
-  let fin = fh * 60 + fm;
-  if (fin < inicio) fin += 1440;
-
-  const durPSV = fin - inicio;
-  const vueloMin = tiempoEnMinutos(vuelo);
-  const nocturno = (ih >= 21 || ih < 6);
-  const limites = { 2: { hv: 480, psv: 720, ext: 120, noct: 720 }, 3: { hv: 720, psv: 1080 }, 4: { hv: 960, psv: 1200 } };
-  const { hv, psv, ext, noct } = limites[tipo];
-
-  const deltaLong = Math.abs(aeropuertos[ori].lon - aeropuertos[des].lon);
-  const ajusteDescanso = deltaLong >= 45 ? 120 + Math.floor((deltaLong - 45) / 15) * 30 : 0;
-  const descansoBase = calcularDescansoBase(Math.ceil(durPSV / 60));
-  const descansoTotal = descansoBase + ajusteDescanso;
-
-  let msg = `🕒 PSV: ${minutosAHorasYMinutos(durPSV)}\n`;
-  msg += `✈️ Vuelo: ${minutosAHorasYMinutos(vueloMin)}\n`;
-  msg += `🌍 ΔLongitud: ${deltaLong.toFixed(2)}°\n`;
-  msg += `🛌 Descanso mínimo base: ${minutosAHorasYMinutos(descansoBase)}\n`;
-  if (ajusteDescanso) {
-    msg += `🛌 Ajuste por longitud: +${minutosAHorasYMinutos(ajusteDescanso)}\n`;
-    msg += `✅ Se ha agregado el período de descanso adicional establecido por cambio de longitud geográfica\n`;
-  }
-  msg += `🛌 Descanso total requerido: ${minutosAHorasYMinutos(descansoTotal)}\n\n`;
-
-  if (nocturno && durPSV > (noct || psv)) {
-    msg += `❌ Restricción nocturna activa: PSV no puede exceder ${minutosAHorasYMinutos(noct || psv)}\n`;
-  } else {
-    msg += durPSV > (psv + (ext || 0)) ? `❌ PSV excedido (máx. ${minutosAHorasYMinutos(psv + (ext || 0))})\n` : `✅ PSV dentro de límite\n`;
-  }
-
-  msg += vueloMin > hv ? `❌ HV excedido (máx. ${minutosAHorasYMinutos(hv)})` : `✅ HV dentro de límite`;
-  document.getElementById("resultado").innerHTML = msg
-    .replace(/✅/g, '<span class="ok">✅</span>')
-    .replace(/❌/g, '<span class="error">❌</span>')
-    .replace(/🛌|✈️|🕒|🌍|📘/g, '<span class="info">$&</span>')
-    .replace(/\n/g, '<br>');
-}
-
-window.addEventListener("DOMContentLoaded", llenarSelectHorasMinutos);
-
+window.onload = function() {
+  cargarAeropuertos();
+};
 </script>
-
 </body>
 </html>
