@@ -116,7 +116,7 @@
     </div>
   </div>
   <div>
-    <label>Tiempo Vuelo (Block+30)</label>
+    <label>Block Time</label>
     <input id="blockComputed" readonly />
   </div>
 </div>
@@ -272,6 +272,61 @@ function cargarAeropuertos() {
 
 window.onload = function() {
   cargarAeropuertos();
+};
+</script>
+
+
+<script>
+function calcularTiemposVuelo() {
+  const bIniH = parseInt(document.getElementById("blockInicioHora").value || 0);
+  const bIniM = parseInt(document.getElementById("blockInicioMin").value || 0);
+  const bFinH = parseInt(document.getElementById("blockFinHora").value || 0);
+  const bFinM = parseInt(document.getElementById("blockFinMin").value || 0);
+  const aIniH = parseInt(document.getElementById("airInicioHora").value || 0);
+  const aIniM = parseInt(document.getElementById("airInicioMin").value || 0);
+  const aFinH = parseInt(document.getElementById("airFinHora").value || 0);
+  const aFinM = parseInt(document.getElementById("airFinMin").value || 0);
+
+  let bStart = bIniH * 60 + bIniM;
+  let bEnd = bFinH * 60 + bFinM;
+  if (bEnd < bStart) bEnd += 1440;
+  let bTime = bEnd - bStart;
+  let bText = `${Math.floor(bTime/60)}h ${("0"+(bTime%60)).slice(-2)}min`;
+  document.getElementById("blockComputed").value = bText;
+
+  let aStart = aIniH * 60 + aIniM;
+  let aEnd = aFinH * 60 + aFinM;
+  if (aEnd < aStart) aEnd += 1440;
+  let aTime = aEnd - aStart;
+  let aText = `${Math.floor(aTime/60)}h ${("0"+(aTime%60)).slice(-2)}min`;
+  document.getElementById("airComputed").value = aText;
+
+  // Mostrar mensaje de descanso
+  let descanso = 720;
+  if (bTime <= 300) descanso = 720;
+  else if (bTime <= 480) descanso = 840;
+  else if (bTime <= 600) descanso = 960;
+  else descanso = 1080;
+
+  let totalMin = bEnd + 30 + descanso;
+  let h = Math.floor((totalMin % 1440) / 60);
+  let m = totalMin % 60;
+
+  document.getElementById("proximoInicio").innerHTML =
+    "🕐 Próximo PSV permitido a partir de: <strong>" + ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2) + "</strong>";
+}
+window.onload = function() {
+  cargarAeropuertos();
+  for (let i = 0; i < 24; i++) {
+    document.querySelectorAll("select.time").forEach(sel => {
+      if (sel.options.length < 24 && sel.id.includes("Hora")) sel.add(new Option(("0"+i).slice(-2), i));
+    });
+  }
+  for (let i = 0; i < 60; i += 5) {
+    document.querySelectorAll("select.time").forEach(sel => {
+      if (sel.options.length < 36 && sel.id.includes("Min")) sel.add(new Option(("0"+i).slice(-2), i));
+    });
+  }
 };
 </script>
 </body>
