@@ -358,7 +358,7 @@
     let finMin = parseInt(document.getElementById("finMin").value || 0);
     let inicio = iniHora * 60 + iniMin;
     let fin = finHora * 60 + finMin;
-    if (fin < inicio) fin += 1440;
+    if (fin <= inicio) fin += 1440;
     let duracion = fin - inicio;
 
     let blockInicioH = parseInt(document.getElementById("blockInicioHora").value || 0);
@@ -367,7 +367,7 @@
     let blockFinM = parseInt(document.getElementById("blockFinMin").value || 0);
     let inicioBlock = blockInicioH * 60 + blockInicioM;
     let finBlock = blockFinH * 60 + blockFinM;
-    if (finBlock < inicioBlock) finBlock += 1440;
+    if (finBlock <=inicioBlock) finBlock += 1440;
     let tiempoVuelo = finBlock - inicioBlock;
 
     validarRestriccionesHV(duracion, tiempoVuelo, tripulacion, inicio);
