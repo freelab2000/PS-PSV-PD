@@ -312,11 +312,16 @@
     let totalMin = blockFinHora * 60 + blockFinMin + 30 + descansoFinal;
     let h = Math.floor((totalMin % 1440) / 60);
     let m = totalMin % 60;
+    let esDiaSiguiente = totalMin >= 1440;
 
-    const descansoTexto = `${Math.floor(descansoFinal/60)}h ${("0"+(descansoFinal%60)).slice(-2)}min`;
-    document.getElementById("proximoInicio").innerHTML =
-      "🕐 Próximo PSV permitido a partir de: <strong>" + ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2) +
-      "</strong><br>🛌 Período de descanso requerido: <strong>" + descansoTexto + "</strong>";
+const horaTexto = ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2);
+const descansoTexto = `${Math.floor(descansoFinal/60)}h ${("0"+(descansoFinal%60)).slice(-2)}min`;
+
+document.getElementById("proximoInicio").innerHTML =
+  "🕐 Próximo PSV permitido a partir de: <strong>" + horaTexto +
+  (esDiaSiguiente ? " del día siguiente" : "") + "</strong><br>" +
+  "🛌 Período de descanso requerido: <strong>" + descansoTexto + "</strong>";
+
   }
 
   function validarRestriccionesHV(PSVmin, vueloMin, tripulacion, horaInicioPSV) {
