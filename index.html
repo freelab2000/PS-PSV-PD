@@ -178,6 +178,27 @@
 <script>
 function validarPSV() {
   calcularProximoInicioDinamico();
+
+  let tripulacion = parseInt(document.getElementById("tripulacion").value || 2);
+  let iniHora = parseInt(document.getElementById("inicioHora").value || 0);
+  let iniMin = parseInt(document.getElementById("inicioMin").value || 0);
+  let finHora = parseInt(document.getElementById("finHora").value || 0);
+  let finMin = parseInt(document.getElementById("finMin").value || 0);
+  let inicio = iniHora * 60 + iniMin;
+  let fin = finHora * 60 + finMin;
+  if (fin < inicio) fin += 1440;
+  let duracion = fin - inicio;
+
+  let blockInicioH = parseInt(document.getElementById("blockInicioHora").value || 0);
+  let blockInicioM = parseInt(document.getElementById("blockInicioMin").value || 0);
+  let blockFinH = parseInt(document.getElementById("blockFinHora").value || 0);
+  let blockFinM = parseInt(document.getElementById("blockFinMin").value || 0);
+  let inicioBlock = blockInicioH * 60 + blockInicioM;
+  let finBlock = blockFinH * 60 + blockFinM;
+  if (finBlock < inicioBlock) finBlock += 1440;
+  let tiempoVuelo = finBlock - inicioBlock;
+
+  validarRestriccionesHV(duracion, tiempoVuelo, tripulacion, inicio);
 }
 
 function calcularProximoInicioDinamico() {
@@ -191,11 +212,7 @@ function calcularProximoInicioDinamico() {
   if (fin < inicio) fin += 1440;
 
   let duracion = fin - inicio;
-  let descanso = 720;
-  if (duracion <= 300) descanso = 720;
-  else if (duracion <= 480) descanso = 840;
-  else if (duracion <= 600) descanso = 960;
-  else descanso = 1080;
+  let descanso = obtenerDescansoDesdeTabla(duracion);
 
   let blockFinHora = parseInt(document.getElementById("blockFinHora").value || 0);
   let blockFinMin = parseInt(document.getElementById("blockFinMin").value || 0);
@@ -278,6 +295,54 @@ function cargarAeropuertos() {
 window.onload = function() {
   cargarAeropuertos();
 };
+
+function validarRestriccionesHV(PSVmin, vueloMin, tripulacion, horaInicioPSV) {
+  const limites = {
+    2: { hv: 480, psv: 720, nocturna: true },
+    3: { hv: 720, psv: 1080, nocturna: false },
+    4: { hv: 960, psv: 1200, nocturna: false }
+  };
+
+  const limitesTrip = limites[tripulacion];
+  let mensajes = [];
+
+  if (vueloMin > limitesTrip.hv) {
+    mensajes.push("❌ HV excedido (máx. " + Math.floor(limitesTrip.hv / 60) + "h)");
+  } else {
+    mensajes.push("✅ HV dentro de límite");
+  }
+
+  if (PSVmin > limitesTrip.psv) {
+    mensajes.push("❌ PSV excedido (máx. " + Math.floor(limitesTrip.psv / 60) + "h)");
+  } else {
+    mensajes.push("✅ PSV dentro de límite");
+  }
+
+  if (tripulacion == 2 && (horaInicioPSV >= 1260 || horaInicioPSV < 360)) {
+    mensajes.push("⚠️ PSV nocturno detectado entre 21:00 y 06:00. No se permite extensión.");
+  }
+
+  document.getElementById("validaciones").innerHTML = mensajes.join("<br>");
+}
+
+function obtenerDescansoDesdeTabla(duracion) {
+  if (duracion <= 420) return 600;
+  if (duracion <= 480) return 720;
+  if (duracion <= 540) return 780;
+  if (duracion <= 600) return 840;
+  if (duracion <= 660) return 900;
+  if (duracion <= 720) return 900;
+  if (duracion <= 780) return 900;
+  if (duracion <= 840) return 1020;
+  if (duracion <= 900) return 1020;
+  if (duracion <= 960) return 1080;
+  if (duracion <= 1020) return 1140;
+  if (duracion <= 1080) return 1200;
+  if (duracion <= 1140) return 1320;
+  if (duracion <= 1200) return 1440;
+  return 1440;
+}
+
 </script>
 
 
@@ -336,6 +401,54 @@ window.onload = function() {
     });
   }
 };
+
+function validarRestriccionesHV(PSVmin, vueloMin, tripulacion, horaInicioPSV) {
+  const limites = {
+    2: { hv: 480, psv: 720, nocturna: true },
+    3: { hv: 720, psv: 1080, nocturna: false },
+    4: { hv: 960, psv: 1200, nocturna: false }
+  };
+
+  const limitesTrip = limites[tripulacion];
+  let mensajes = [];
+
+  if (vueloMin > limitesTrip.hv) {
+    mensajes.push("❌ HV excedido (máx. " + Math.floor(limitesTrip.hv / 60) + "h)");
+  } else {
+    mensajes.push("✅ HV dentro de límite");
+  }
+
+  if (PSVmin > limitesTrip.psv) {
+    mensajes.push("❌ PSV excedido (máx. " + Math.floor(limitesTrip.psv / 60) + "h)");
+  } else {
+    mensajes.push("✅ PSV dentro de límite");
+  }
+
+  if (tripulacion == 2 && (horaInicioPSV >= 1260 || horaInicioPSV < 360)) {
+    mensajes.push("⚠️ PSV nocturno detectado entre 21:00 y 06:00. No se permite extensión.");
+  }
+
+  document.getElementById("validaciones").innerHTML = mensajes.join("<br>");
+}
+
+function obtenerDescansoDesdeTabla(duracion) {
+  if (duracion <= 420) return 600;
+  if (duracion <= 480) return 720;
+  if (duracion <= 540) return 780;
+  if (duracion <= 600) return 840;
+  if (duracion <= 660) return 900;
+  if (duracion <= 720) return 900;
+  if (duracion <= 780) return 900;
+  if (duracion <= 840) return 1020;
+  if (duracion <= 900) return 1020;
+  if (duracion <= 960) return 1080;
+  if (duracion <= 1020) return 1140;
+  if (duracion <= 1080) return 1200;
+  if (duracion <= 1140) return 1320;
+  if (duracion <= 1200) return 1440;
+  return 1440;
+}
+
 </script>
 </body>
 </html>
