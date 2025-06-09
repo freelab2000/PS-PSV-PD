@@ -102,17 +102,17 @@
 <!-- BLOCK Y AIR TIME -->
 <div class="bitacora-block">
   <div>
-    <label>Inicio Block</label>
+    <label>Block Out</label>
     <div class="time-group">
-      <select id="blockInicioHora" class="time"></select> :
-      <select id="blockInicioMin" class="time"></select>
+      <select id="blockInicioHora" class="time" onchange="calcularTiemposVuelo()"></select> :
+      <select id="blockInicioMin" class="time" onchange="calcularTiemposVuelo()"></select>
     </div>
   </div>
   <div>
-    <label>Fin Block</label>
+    <label>Block In</label>
     <div class="time-group">
-      <select id="blockFinHora" class="time"></select> :
-      <select id="blockFinMin" class="time"></select>
+      <select id="blockFinHora" class="time" onchange="calcularTiemposVuelo()"></select> :
+      <select id="blockFinMin" class="time" onchange="calcularTiemposVuelo()"></select>
     </div>
   </div>
   <div>
@@ -123,17 +123,17 @@
 
 <div class="bitacora-block">
   <div>
-    <label>Inicio Air</label>
+    <label>Air T/O</label>
     <div class="time-group">
-      <select id="airInicioHora" class="time"></select> :
-      <select id="airInicioMin" class="time"></select>
+      <select id="airInicioHora" class="time" onchange="calcularTiemposVuelo()"></select> :
+      <select id="airInicioMin" class="time" onchange="calcularTiemposVuelo()"></select>
     </div>
   </div>
   <div>
-    <label>Fin Air</label>
+    <label>Air LDG</label>
     <div class="time-group">
-      <select id="airFinHora" class="time"></select> :
-      <select id="airFinMin" class="time"></select>
+      <select id="airFinHora" class="time" onchange="calcularTiemposVuelo()"></select> :
+      <select id="airFinMin" class="time" onchange="calcularTiemposVuelo()"></select>
     </div>
   </div>
   <div>
@@ -171,7 +171,7 @@
 
 <div class="resultado" id="resultado">
   <p class="info">Nota: Al Block Time se le agregan 30 minutos para el cálculo del período de descanso.</p>
-  <p class="info">Hora estimada para iniciar próximo PSV = Fin Block Time + 30 min + período de descanso.</p>
+  <p class="info">Hora estimada para iniciar próximo PSV = Block In Time + 30 min + período de descanso.</p>
   <div id="proximoInicio" class="info" style="margin-top:10px;"></div>
 </div>
 
@@ -207,6 +207,8 @@ function calcularProximoInicioDinamico() {
   document.getElementById("proximoInicio").innerHTML =
     "🕐 Próximo PSV permitido a partir de: <strong>" + ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2) + "</strong> (descanso automático según duración PSV)";
 }
+
+
 const aeropuertos = [
   { codigo: "CYHZ", nombre: "Halifax", lon: -63.5167 },
   { codigo: "CYJT", nombre: "Stephenville", lon: -58.5539 },
@@ -322,7 +324,7 @@ window.onload = function() {
       if (sel.options.length < 24 && sel.id.includes("Hora")) sel.add(new Option(("0"+i).slice(-2), i));
     });
   }
-  for (let i = 0; i < 60; i += 5) {
+  for (let i = 0; i < 60; i++) {
     document.querySelectorAll("select.time").forEach(sel => {
       if (sel.options.length < 36 && sel.id.includes("Min")) sel.add(new Option(("0"+i).slice(-2), i));
     });
