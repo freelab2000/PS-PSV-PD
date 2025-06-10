@@ -348,10 +348,18 @@ document.getElementById("proximoInicio").innerHTML =
     if (tripulacion === 2 && (horaInicioPSV >= 1260 || horaInicioPSV < 360)) {
       mensajes.push("⚠️ <strong>PSV nocturno detectado</strong> entre 21:00 y 06:00. No se permite extensión.");
     }
+    const cruzaRoja = cruzaZonaRoja(horaInicioPSV, horaInicioPSV + PSVmin);
 
-    const validacionesDiv = document.getElementById("validaciones");
-    validacionesDiv.innerHTML = mensajes.join("<br>");
-  }
+if (cruzaRoja) {
+  mensajes.push("🌒 <strong>PSV cruza Zona Roja</strong> (00:30 – 05:30 hora local).<br>⚠️ Solo se permiten 2 noches consecutivas.");
+
+  // Estilo visual especial para advertencia
+  const validacionesDiv = document.getElementById("validaciones");
+  validacionesDiv.style.background = "#fff3cd";
+  validacionesDiv.style.border = "1px solid #e0a800";
+  validacionesDiv.style.padding = "10px";
+  validacionesDiv.style.borderRadius = "8px";
+} 
 
   function validarPSV() {
     calcularProximoInicioDinamico();
@@ -377,6 +385,18 @@ document.getElementById("proximoInicio").innerHTML =
 
     validarRestriccionesHV(duracion, tiempoVuelo, tripulacion, inicio);
   }
+  function cruzaZonaRoja(inicio, fin) {
+  if (fin <= inicio) fin += 1440;
+
+  for (let t = inicio; t < fin; t++) {
+    let minDelDia = t % 1440;
+    if (minDelDia >= 30 && minDelDia < 330) {
+      return true;
+    }
+  }
+  return false;
+}
+
   function actualizarTiemposComputados() {
   const getMinutos = (hId, mId) =>
     parseInt(document.getElementById(hId).value || 0) * 60 +
