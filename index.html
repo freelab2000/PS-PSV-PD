@@ -176,7 +176,7 @@
 </div>
 
 <script>
-  window.addEventListener("DOMContentLoaded", function () {
+  window.onload = function () {
   cargarAeropuertos();
 
   // Inicializa los selects de hora y minuto
@@ -195,8 +195,7 @@
   document.querySelectorAll("select.time").forEach(sel => {
     sel.addEventListener("change", actualizarTiemposComputados);
   });
-  actualizarTiemposComputados();
-});
+};
 
   const aeropuertos = [
     { codigo: "CYHZ", nombre: "Halifax", lon: -63.5167 },
@@ -361,17 +360,6 @@ if (cruzaRoja) {
   validacionesDiv.style.padding = "10px";
   validacionesDiv.style.borderRadius = "8px";
 } 
-  function cruzaZonaRoja(inicio, fin) {
-  if (fin <= inicio) fin += 1440;
-
-  for (let t = inicio; t < fin; t++) {
-    let minDelDia = t % 1440;
-    if (minDelDia >= 30 && minDelDia < 330) {
-      return true;
-    }
-  }
-
-  return false;
 
   function validarPSV() {
     calcularProximoInicioDinamico();
@@ -397,39 +385,42 @@ if (cruzaRoja) {
 
     validarRestriccionesHV(duracion, tiempoVuelo, tripulacion, inicio);
   }
+  function cruzaZonaRoja(inicio, fin) {
+  if (fin <= inicio) fin += 1440;
+
+  for (let t = inicio; t < fin; t++) {
+    let minDelDia = t % 1440;
+    if (minDelDia >= 30 && minDelDia < 330) {
+      return true;
+    }
+  }
+  return false;
 }
 
-function actualizarTiemposComputados() {
-  const getMinutos = (hId, mId) => {
-    const h = parseInt(document.getElementById(hId).value);
-    const m = parseInt(document.getElementById(mId).value);
-    return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
-  };
+  function actualizarTiemposComputados() {
+  const getMinutos = (hId, mId) =>
+    parseInt(document.getElementById(hId).value || 0) * 60 +
+    parseInt(document.getElementById(mId).value || 0);
 
   const calcularDuracion = (ini, fin) => {
     let dur = fin - ini;
-    if (dur < 0) dur += 1440;
+    if (dur < 0) dur += 1440; // Ajuste por paso de medianoche
     return dur;
   };
 
-  const mostrarTiempo = (min) => {
-    return Math.floor(min / 60).toString().padStart(2, '0') + ':' +
-           (min % 60).toString().padStart(2, '0');
-  };
+  const mostrarTiempo = (min) =>
+    Math.floor(min / 60).toString().padStart(2, '0') + ':' +
+    (min % 60).toString().padStart(2, '0');
 
-  const blockField = document.getElementById("blockComputed");
-  const airField = document.getElementById("airComputed");
-
-  let iniBlock = getMinutos("blockInicioHora", "blockInicioMin");
+  let inicioBlock = getMinutos("blockInicioHora", "blockInicioMin");
   let finBlock = getMinutos("blockFinHora", "blockFinMin");
-  let durBlock = calcularDuracion(iniBlock, finBlock);
-  blockField.value = isNaN(durBlock) ? "" : mostrarTiempo(durBlock);
+  let durBlock = calcularDuracion(inicioBlock, finBlock);
+  document.getElementById("blockComputed").value = mostrarTiempo(durBlock);
 
-  let iniAir = getMinutos("airInicioHora", "airInicioMin");
+  let inicioAir = getMinutos("airInicioHora", "airInicioMin");
   let finAir = getMinutos("airFinHora", "airFinMin");
-  let durAir = calcularDuracion(iniAir, finAir);
-  airField.value = isNaN(durAir) ? "" : mostrarTiempo(durAir);
-}
+  let durAir = calcularDuracion(inicioAir, finAir);
+  document.getElementById("airComputed").value = mostrarTiempo(durAir);
 }
 </script>
 </body>
