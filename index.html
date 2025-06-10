@@ -400,9 +400,11 @@ if (cruzaRoja) {
 }
 
   function actualizarTiemposComputados() {
-  const getMinutos = (hId, mId) =>
-    parseInt(document.getElementById(hId).value || 0) * 60 +
-    parseInt(document.getElementById(mId).value || 0);
+    const getMinutos = (hId, mId) => {
+  const h = parseInt(document.getElementById(hId).value);
+  const m = parseInt(document.getElementById(mId).value);
+  return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
+};
 
   const calcularDuracion = (ini, fin) => {
     let dur = fin - ini;
