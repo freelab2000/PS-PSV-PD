@@ -399,32 +399,37 @@ if (cruzaRoja) {
   }
 }
 
-  function actualizarTiemposComputados() {
-    const getMinutos = (hId, mId) => {
-  const h = parseInt(document.getElementById(hId).value);
-  const m = parseInt(document.getElementById(mId).value);
-  return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
-};
+function actualizarTiemposComputados() {
+  const getMinutos = (hId, mId) => {
+    const h = parseInt(document.getElementById(hId).value);
+    const m = parseInt(document.getElementById(mId).value);
+    return (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m);
+  };
 
   const calcularDuracion = (ini, fin) => {
     let dur = fin - ini;
-    if (dur < 0) dur += 1440; // Ajuste por paso de medianoche
+    if (dur < 0) dur += 1440;
     return dur;
   };
 
-  const mostrarTiempo = (min) =>
-    Math.floor(min / 60).toString().padStart(2, '0') + ':' +
-    (min % 60).toString().padStart(2, '0');
+  const mostrarTiempo = (min) => {
+    return Math.floor(min / 60).toString().padStart(2, '0') + ':' +
+           (min % 60).toString().padStart(2, '0');
+  };
 
-  let inicioBlock = getMinutos("blockInicioHora", "blockInicioMin");
+  const blockField = document.getElementById("blockComputed");
+  const airField = document.getElementById("airComputed");
+
+  let iniBlock = getMinutos("blockInicioHora", "blockInicioMin");
   let finBlock = getMinutos("blockFinHora", "blockFinMin");
-  let durBlock = calcularDuracion(inicioBlock, finBlock);
-  document.getElementById("blockComputed").value = mostrarTiempo(durBlock);
+  let durBlock = calcularDuracion(iniBlock, finBlock);
+  blockField.value = isNaN(durBlock) ? "" : mostrarTiempo(durBlock);
 
-  let inicioAir = getMinutos("airInicioHora", "airInicioMin");
+  let iniAir = getMinutos("airInicioHora", "airInicioMin");
   let finAir = getMinutos("airFinHora", "airFinMin");
-  let durAir = calcularDuracion(inicioAir, finAir);
-  document.getElementById("airComputed").value = mostrarTiempo(durAir);
+  let durAir = calcularDuracion(iniAir, finAir);
+  airField.value = isNaN(durAir) ? "" : mostrarTiempo(durAir);
+}
 }
 </script>
 </body>
