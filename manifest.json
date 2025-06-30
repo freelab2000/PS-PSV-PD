@@ -1,12 +1,11 @@
 {
-  "name": "PSV/PS/PD",
-  "short_name": "PSV",
+  "name": "Validación PSV / PD / HV",
+  "short_name": "PSV-PD-HV",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#f2f2f2",
   "theme_color": "#004080",
-  "description": "App para validación de Periodo de Servicio de Vuelo y Descanso",
-  "orientation": "portrait-primary",
+  "description": "App PWA para validar periodos de servicio de vuelo, descanso y horas de vuelo según normativa.",
   "icons": [
     {
       "src": "icon-192x192.png",
