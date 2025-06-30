@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content=device-width, initial-scale=1.0"/>
   <title>Validación PSV / PD / HV</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#004080" />
@@ -18,11 +18,11 @@
 <body>
   <h1>Validación de Períodos de Servicio y Descanso</h1>
 
-  <label for="inicio">Inicio PSV:</label>
-  <input type="datetime-local" id="inicio" />
+  <label for="inicio">Hora Inicio (HHMM):</label>
+  <input type="text" id="inicio" maxlength="4" placeholder="Ej: 0830" />
 
-  <label for="fin">Fin PSV:</label>
-  <input type="datetime-local" id="fin" />
+  <label for="fin">Hora Fin (HHMM):</label>
+  <input type="text" id="fin" maxlength="4" placeholder="Ej: 1430" />
 
   <label for="hv">Horas de Vuelo (HV):</label>
   <input type="number" id="hv" step="0.1" />
@@ -35,15 +35,63 @@
   </select>
 
   <label for="origen">Aeropuerto Origen (ICAO):</label>
-  <input type="text" id="origen" />
+  <select id="origen">
+    <option value="kmia">KMIA</option>
+    <option value="scel">SCEL</option>
+    <option value="saez">SAEZ</option>
+    <option value="segu">SEGU</option>
+    <option value="seqm">SEQM</option>
+    <option value="skbo">SKBO</option>
+    <option value="mpto">MPTO</option>
+    <option value="kbos">KBOS</option>
+    <option value="eham">EHAM</option>
+    <option value="eddf">EDDF</option>
+    <option value="ebbr">EBBR</option>
+    <option value="gvac">GVAC</option>
+    <option value="gvnp">GVNP</option>
+    <option value="saco">SACO</option>
+    <option value="same">SAME</option>
+    <option value="scie">SCIE</option>
+    <option value="sbkp">SBKP</option>
+    <option value="sbgl">SBGL</option>
+    <option value="sbgr">SBGR</option>
+    <option value="sbfz">SBFZ</option>
+    <option value="sbsg">SBSG</option>
+    <option value="gclp">GCLP</option>
+    <option value="gcts">GCTS</option>
+    <option value="gmmn">GMMN</option>
+    <option value="lppt">LPPT</option>
+    <option value="lemd">LEMD</option>
+  </select>
 
   <label for="destino">Aeropuerto Destino (ICAO):</label>
-  <input type="text" id="destino" />
-
-  <label for="simulador">¿Simulador en Europa?</label>
-  <select id="simulador">
-    <option value="no">No</option>
-    <option value="si">Sí</option>
+  <select id="destino">
+    <option value="kmia">KMIA</option>
+    <option value="scel">SCEL</option>
+    <option value="saez">SAEZ</option>
+    <option value="segu">SEGU</option>
+    <option value="seqm">SEQM</option>
+    <option value="skbo">SKBO</option>
+    <option value="mpto">MPTO</option>
+    <option value="kbos">KBOS</option>
+    <option value="eham">EHAM</option>
+    <option value="eddf">EDDF</option>
+    <option value="ebbr">EBBR</option>
+    <option value="gvac">GVAC</option>
+    <option value="gvnp">GVNP</option>
+    <option value="saco">SACO</option>
+    <option value="same">SAME</option>
+    <option value="scie">SCIE</option>
+    <option value="sbkp">SBKP</option>
+    <option value="sbgl">SBGL</option>
+    <option value="sbgr">SBGR</option>
+    <option value="sbfz">SBFZ</option>
+    <option value="sbsg">SBSG</option>
+    <option value="gclp">GCLP</option>
+    <option value="gcts">GCTS</option>
+    <option value="gmmn">GMMN</option>
+    <option value="lppt">LPPT</option>
+    <option value="lemd">LEMD</option>
   </select>
 
   <button onclick="validar()">Validar</button>
@@ -51,33 +99,32 @@
   <div class="resultado" id="resultado"></div>
 
   <script>
-    const aeropuertos = ["kmia", "scel", "saez", "segu", "seqm", "skbo", "mpto", "kbos", "eham", "eddf", "ebbr", "gvac", "gvnp", "saco", "same", "scie", "sbkp", "sbgl", "sbgr", "sbfz", "sbsg", "gclp", "gcts", "gmmn", "lppt", "lemd"];
+    const coords = {
+      kmia: -80.2906, scel: -70.7938, saez: -58.5358, segu: -78.5083,
+      seqm: -78.4870, skbo: -74.1469, mpto: -79.3832, kbos: -71.0052,
+      eham: 4.7639, eddf: 8.5706, ebbr: 4.4844, gvac: -23.4833,
+      gvnp: -25.0833, saco: -64.2080, same: -68.1136, scie: -72.9562,
+      sbkp: -47.1344, sbgl: -43.2506, sbgr: -46.4695, sbfz: -38.5294,
+      sbsg: -36.3666, gclp: -15.3846, gcts: -16.5725, gmmn: -7.5899,
+      lppt: -9.1280, lemd: -3.5708
+    };
 
-    function calcularHoras(d1, d2) {
-      const ms = new Date(d2) - new Date(d1);
-      return ms / (1000 * 60 * 60);
+    function calcularHorasHHMM(inicio, fin) {
+      const h1 = parseInt(inicio.slice(0,2)) + parseInt(inicio.slice(2))/60;
+      const h2 = parseInt(fin.slice(0,2)) + parseInt(fin.slice(2))/60;
+      let dur = h2 - h1;
+      if (dur < 0) dur += 24;
+      return dur;
     }
 
-    function getLonDif(origen, destino) {
-      const coords = {
-        kmia: -80.2906, scel: -70.7938, saez: -58.5358, segu: -78.5083,
-        seqm: -78.4870, skbo: -74.1469, mpto: -79.3832, kbos: -71.0052,
-        eham: 4.7639, eddf: 8.5706, ebbr: 4.4844, gvac: -23.4833,
-        gvnp: -25.0833, saco: -64.2080, same: -68.1136, scie: -72.9562,
-        sbkp: -47.1344, sbgl: -43.2506, sbgr: -46.4695, sbfz: -38.5294,
-        sbsg: -36.3666, gclp: -15.3846, gcts: -16.5725, gmmn: -7.5899,
-        lppt: -9.1280, lemd: -3.5708
-      };
-      if (!(origen in coords) || !(destino in coords)) return null;
-      return Math.abs(coords[origen] - coords[destino]);
+    function getLonDif(o, d) {
+      if (!(o in coords) || !(d in coords)) return null;
+      return Math.abs(coords[o] - coords[d]);
     }
 
-    function calcularDescansoExtra(lonDiff) {
-      if (lonDiff <= 45) return 0;
-      let extra = 2;
-      lonDiff -= 45;
-      extra += Math.floor(lonDiff / 15) * 0.5;
-      return extra;
+    function calcularDescansoExtra(delta) {
+      if (delta <= 45) return 0;
+      return 2 + Math.floor((delta - 45) / 15) * 0.5;
     }
 
     function validar() {
@@ -85,65 +132,45 @@
       const fin = document.getElementById("fin").value;
       const hv = parseFloat(document.getElementById("hv").value);
       const pilotos = parseInt(document.getElementById("pilotos").value);
-      const origen = document.getElementById("origen").value.toLowerCase();
-      const destino = document.getElementById("destino").value.toLowerCase();
-      const simulador = document.getElementById("simulador").value === "si";
+      const origen = document.getElementById("origen").value;
+      const destino = document.getElementById("destino").value;
+      const r = document.getElementById("resultado");
+      r.innerHTML = "";
 
-      const resultado = document.getElementById("resultado");
-      resultado.innerHTML = "";
-
-      if (!inicio || !fin || isNaN(hv)) {
-        resultado.innerHTML = "Debe completar todos los campos.";
+      if (inicio.length !== 4 || fin.length !== 4 || isNaN(hv)) {
+        r.innerHTML = "Complete todos los campos correctamente.";
         return;
       }
 
-      const psv = calcularHoras(inicio, fin);
-      let maxHV = 0, maxPSV = 0, maxExt = 0, zonaRoja = false;
+      const psv = calcularHorasHHMM(inicio, fin);
+      const psvFmt = `${Math.floor(psv)}h ${Math.round((psv % 1) * 60)}m`;
 
-      if (pilotos === 2) {
-        maxHV = 8;
-        maxPSV = 12;
-        maxExt = 14;
-        zonaRoja = true;
-      } else if (pilotos === 3) {
-        maxHV = 12;
-        maxPSV = 18;
-      } else if (pilotos === 4) {
-        maxHV = 16;
-        maxPSV = 20;
-      }
+      let maxHV = 0, maxPSV = 0, maxExt = 0;
+      if (pilotos === 2) { maxHV = 8; maxPSV = 12; maxExt = 14; }
+      if (pilotos === 3) { maxHV = 12; maxPSV = 18; }
+      if (pilotos === 4) { maxHV = 16; maxPSV = 20; }
 
       let msg = `<b>Resultado:</b><br>`;
-      msg += `PSV: ${psv.toFixed(2)} h (máx: ${maxPSV}${maxExt ? '-' + maxExt : ''})<br>`;
+      msg += `PSV: ${psvFmt} (${psv.toFixed(2)} h) [máx: ${maxPSV}${maxExt ? '-' + maxExt : ''}]<br>`;
       msg += `HV: ${hv} h (máx: ${maxHV})<br>`;
 
       if (hv > maxHV) msg += `<span style='color:red'>Exceso de horas de vuelo</span><br>`;
       if (psv > maxPSV && pilotos === 2 && psv <= maxExt) {
-        msg += `<span style='color:orange'>Extensión de PSV aceptada (2 pilotos)</span><br>`;
+        msg += `<span style='color:orange'>Extensión válida (2 pilotos)</span><br>`;
       } else if (psv > maxPSV) {
         msg += `<span style='color:red'>Exceso en período de servicio</span><br>`;
       }
 
-      if (zonaRoja) {
-        const h1 = new Date(inicio).getHours() + new Date(inicio).getMinutes()/60;
-        const h2 = new Date(fin).getHours() + new Date(fin).getMinutes()/60;
-        const entraZonaRoja = h1 < 5.5 && h1 >= 0.5 || h2 < 5.5 && h2 >= 0.5;
-        if (entraZonaRoja && !(simulador && new Date(fin).getHours() <= 2)) {
-          msg += `<span style='color:red'>Restricción zona roja (00:30–05:30)</span><br>`;
-        }
-      }
-
-      const lonDiff = getLonDif(origen, destino);
-      if (lonDiff !== null) {
-        const extraDescanso = calcularDescansoExtra(lonDiff);
-        if (extraDescanso > 0) {
-          msg += `∆ Longitud Geográfica: ${lonDiff.toFixed(1)}° → descanso +${extraDescanso} h<br>`;
-        }
+      const lon = getLonDif(origen, destino);
+      if (lon !== null) {
+        const extra = calcularDescansoExtra(lon);
+        if (extra > 0)
+          msg += `∆ Long: ${lon.toFixed(1)}° → descanso +${extra} h<br>`;
       } else {
-        msg += "<span style='color:orange'>No se pudo calcular ∆ Longitud por falta de datos ICAO</span><br>";
+        msg += "<span style='color:orange'>No se pudo calcular ∆ Longitud</span><br>";
       }
 
-      resultado.innerHTML = msg;
+      r.innerHTML = msg;
     }
   </script>
 </body>
