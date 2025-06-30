@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Validación PSV / PD / HV</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#004080" />
@@ -18,11 +18,11 @@
 <body>
   <h1>Validación de Períodos de Servicio y Descanso</h1>
 
-  <label for="inicio">Hora Inicio (HHMM):</label>
-  <input type="text" id="inicio" maxlength="4" placeholder="Ej: 0830" />
+  <label for="inicio">Hora Inicio (HH:MM):</label>
+  <input type="time" id="inicio" />
 
-  <label for="fin">Hora Fin (HHMM):</label>
-  <input type="text" id="fin" maxlength="4" placeholder="Ej: 1430" />
+  <label for="fin">Hora Fin (HH:MM):</label>
+  <input type="time" id="fin" />
 
   <label for="hv">Horas de Vuelo (HV):</label>
   <input type="number" id="hv" step="0.1" />
@@ -54,6 +54,9 @@
     <option value="lemd">LEMD</option>
   </select>
 
+  <label for="pdReal">Descanso Programado (horas):</label>
+  <input type="number" id="pdReal" step="0.1" placeholder="Ej: 11.5" />
+
   <button onclick="validar()">Validar</button>
 
   <div class="resultado" id="resultado"></div>
@@ -69,19 +72,6 @@
       lppt: -9.1280, lemd: -3.5708
     };
 
-    function calcularHorasHHMM(inicio, fin) {
-      const h1 = parseInt(inicio.slice(0,2)) + parseInt(inicio.slice(2))/60;
-      const h2 = parseInt(fin.slice(0,2)) + parseInt(fin.slice(2))/60;
-      let dur = h2 - h1;
-      if (dur < 0) dur += 24;
-      return dur;
-    }
-
-    function getLonDif(o, d) {
-      if (!(o in coords) || !(d in coords)) return null;
-      return Math.abs(coords[o] - coords[d]);
-    }
-
     function calcularDescansoExtra(delta) {
       if (delta <= 45) return 0;
       return 2 + Math.floor((delta - 45) / 15) * 0.5;
@@ -96,6 +86,11 @@
       return tabla[base] || 'No definido';
     }
 
+    function getLonDif(o, d) {
+      if (!(o in coords) || !(d in coords)) return null;
+      return Math.abs(coords[o] - coords[d]);
+    }
+
     function validar() {
       const inicio = document.getElementById("inicio").value;
       const fin = document.getElementById("fin").value;
@@ -103,15 +98,25 @@
       const pilotos = parseInt(document.getElementById("pilotos").value);
       const origen = document.getElementById("origen").value;
       const destino = document.getElementById("destino").value;
+      const pdReal = parseFloat(document.getElementById("pdReal").value);
       const r = document.getElementById("resultado");
       r.innerHTML = "";
 
-      if (inicio.length !== 4 || fin.length !== 4 || isNaN(hv)) {
-        r.innerHTML = "Complete todos los campos correctamente.";
+      if (!inicio || !fin || isNaN(hv)) {
+        r.innerHTML = "Debe completar todos los campos.";
+        return;
+      }
+      if (!/^\\d{{2}}:\\d{{2}}$/.test(inicio) || !/^\\d{{2}}:\\d{{2}}$/.test(fin)) {
+        r.innerHTML = "Formato de hora inválido. Use HH:MM.";
         return;
       }
 
-      const psv = calcularHorasHHMM(inicio, fin);
+      const [hhi, mmi] = inicio.split(":").map(Number);
+      const [hhf, mmf] = fin.split(":").map(Number);
+      let h1 = hhi + mmi / 60;
+      let h2 = hhf + mmf / 60;
+      let psv = h2 - h1;
+      if (psv < 0) psv += 24;
       const psvFmt = `${Math.floor(psv)}h ${Math.round((psv % 1) * 60)}m`;
 
       let maxHV = 0, maxPSV = 0, maxExt = 0;
@@ -144,6 +149,15 @@
 
       const pdTotal = (typeof pdBase === 'number') ? pdBase + pdExtra : 'Indefinido';
       msg += `PD mínimo requerido: ${pdTotal} h<br>`;
+
+      if (!isNaN(pdReal) && typeof pdTotal === 'number') {
+        if (pdReal >= pdTotal) {
+          msg += "<span style='color:green'>✔ Cumple descanso mínimo requerido</span><br>";
+        } else {
+          msg += "<span style='color:red'>✖ No cumple descanso mínimo requerido</span><br>";
+        }
+      }
+
       r.innerHTML = msg;
     }
   </script>
