@@ -36,61 +36,21 @@
 
   <label for="origen">Aeropuerto Origen (ICAO):</label>
   <select id="origen">
-    <option value="kmia">KMIA</option>
-    <option value="scel">SCEL</option>
-    <option value="saez">SAEZ</option>
-    <option value="segu">SEGU</option>
-    <option value="seqm">SEQM</option>
-    <option value="skbo">SKBO</option>
-    <option value="mpto">MPTO</option>
-    <option value="kbos">KBOS</option>
-    <option value="eham">EHAM</option>
-    <option value="eddf">EDDF</option>
-    <option value="ebbr">EBBR</option>
-    <option value="gvac">GVAC</option>
-    <option value="gvnp">GVNP</option>
-    <option value="saco">SACO</option>
-    <option value="same">SAME</option>
-    <option value="scie">SCIE</option>
-    <option value="sbkp">SBKP</option>
-    <option value="sbgl">SBGL</option>
-    <option value="sbgr">SBGR</option>
-    <option value="sbfz">SBFZ</option>
-    <option value="sbsg">SBSG</option>
-    <option value="gclp">GCLP</option>
-    <option value="gcts">GCTS</option>
-    <option value="gmmn">GMMN</option>
-    <option value="lppt">LPPT</option>
+    <option value="kmia">KMIA</option><option value="scel">SCEL</option><option value="saez">SAEZ</option><option value="segu">SEGU</option><option value="seqm">SEQM</option>
+    <option value="skbo">SKBO</option><option value="mpto">MPTO</option><option value="kbos">KBOS</option><option value="eham">EHAM</option><option value="eddf">EDDF</option>
+    <option value="ebbr">EBBR</option><option value="gvac">GVAC</option><option value="gvnp">GVNP</option><option value="saco">SACO</option><option value="same">SAME</option>
+    <option value="scie">SCIE</option><option value="sbkp">SBKP</option><option value="sbgl">SBGL</option><option value="sbgr">SBGR</option><option value="sbfz">SBFZ</option>
+    <option value="sbsg">SBSG</option><option value="gclp">GCLP</option><option value="gcts">GCTS</option><option value="gmmn">GMMN</option><option value="lppt">LPPT</option>
     <option value="lemd">LEMD</option>
   </select>
 
   <label for="destino">Aeropuerto Destino (ICAO):</label>
   <select id="destino">
-    <option value="kmia">KMIA</option>
-    <option value="scel">SCEL</option>
-    <option value="saez">SAEZ</option>
-    <option value="segu">SEGU</option>
-    <option value="seqm">SEQM</option>
-    <option value="skbo">SKBO</option>
-    <option value="mpto">MPTO</option>
-    <option value="kbos">KBOS</option>
-    <option value="eham">EHAM</option>
-    <option value="eddf">EDDF</option>
-    <option value="ebbr">EBBR</option>
-    <option value="gvac">GVAC</option>
-    <option value="gvnp">GVNP</option>
-    <option value="saco">SACO</option>
-    <option value="same">SAME</option>
-    <option value="scie">SCIE</option>
-    <option value="sbkp">SBKP</option>
-    <option value="sbgl">SBGL</option>
-    <option value="sbgr">SBGR</option>
-    <option value="sbfz">SBFZ</option>
-    <option value="sbsg">SBSG</option>
-    <option value="gclp">GCLP</option>
-    <option value="gcts">GCTS</option>
-    <option value="gmmn">GMMN</option>
-    <option value="lppt">LPPT</option>
+    <option value="kmia">KMIA</option><option value="scel">SCEL</option><option value="saez">SAEZ</option><option value="segu">SEGU</option><option value="seqm">SEQM</option>
+    <option value="skbo">SKBO</option><option value="mpto">MPTO</option><option value="kbos">KBOS</option><option value="eham">EHAM</option><option value="eddf">EDDF</option>
+    <option value="ebbr">EBBR</option><option value="gvac">GVAC</option><option value="gvnp">GVNP</option><option value="saco">SACO</option><option value="same">SAME</option>
+    <option value="scie">SCIE</option><option value="sbkp">SBKP</option><option value="sbgl">SBGL</option><option value="sbgr">SBGR</option><option value="sbfz">SBFZ</option>
+    <option value="sbsg">SBSG</option><option value="gclp">GCLP</option><option value="gcts">GCTS</option><option value="gmmn">GMMN</option><option value="lppt">LPPT</option>
     <option value="lemd">LEMD</option>
   </select>
 
@@ -127,6 +87,15 @@
       return 2 + Math.floor((delta - 45) / 15) * 0.5;
     }
 
+    function getPdMin(psv) {
+      const tabla = {
+        7: 10, 8: 12, 9: 13, 10: 14, 11: 15, 12: 15, 13: 15,
+        14: 17, 15: 17, 16: 18, 17: 19, 18: 20, 19: 22, 20: 24
+      };
+      const base = Math.floor(psv);
+      return tabla[base] || 'No definido';
+    }
+
     function validar() {
       const inicio = document.getElementById("inicio").value;
       const fin = document.getElementById("fin").value;
@@ -161,15 +130,20 @@
         msg += `<span style='color:red'>Exceso en período de servicio</span><br>`;
       }
 
+      const pdBase = getPdMin(psv);
+      let pdExtra = 0;
       const lon = getLonDif(origen, destino);
       if (lon !== null) {
-        const extra = calcularDescansoExtra(lon);
-        if (extra > 0)
-          msg += `∆ Long: ${lon.toFixed(1)}° → descanso +${extra} h<br>`;
+        pdExtra = calcularDescansoExtra(lon);
+        if (pdExtra > 0) {
+          msg += `∆ Long: ${lon.toFixed(1)}° → descanso +${pdExtra} h<br>`;
+        }
       } else {
         msg += "<span style='color:orange'>No se pudo calcular ∆ Longitud</span><br>";
       }
 
+      const pdTotal = (typeof pdBase === 'number') ? pdBase + pdExtra : 'Indefinido';
+      msg += `PD mínimo requerido: ${pdTotal} h<br>`;
       r.innerHTML = msg;
     }
   </script>
