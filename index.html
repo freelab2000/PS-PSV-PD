@@ -99,48 +99,52 @@
 <body>
 <h1>PSV/PS/PD</h1>
 
-<!-- ORIGINAL A ELIMINAR -->
-<div class="bitacora-block">
-  <div>
-    <label>Block Out</label>
-    <div class="time-group">
-      <select id="blockInicioHora" class="time" onchange="calcularTiemposVuelo()"></select> :
-      <select id="blockInicioMin" class="time" onchange="calcularTiemposVuelo()"></select>
-    </div>
+<div class="grid-bitacora">
+  <div><label>Block Out</label></div>
+  <div><label>Air T/O</label></div>
+  <div><label>Block In</label></div>
+  <div><label>Air LDG</label></div>
+
+  <div class="time-group">
+    <select id="blockInicioHora" class="time" onchange="calcularTiemposVuelo()"></select> :
+    <select id="blockInicioMin" class="time" onchange="calcularTiemposVuelo()"></select>
   </div>
-  <div>
-    <label>Block In</label>
-    <div class="time-group">
-      <select id="blockFinHora" class="time" onchange="calcularTiemposVuelo()"></select> :
-      <select id="blockFinMin" class="time" onchange="calcularTiemposVuelo()"></select>
-    </div>
+  <div class="time-group">
+    <select id="airInicioHora" class="time" onchange="calcularTiemposVuelo()"></select> :
+    <select id="airInicioMin" class="time" onchange="calcularTiemposVuelo()"></select>
   </div>
-  <div>
-    <label>Block Time</label>
-    <input id="blockComputed" readonly />
+  <div class="time-group">
+    <select id="blockFinHora" class="time" onchange="calcularTiemposVuelo()"></select> :
+    <select id="blockFinMin" class="time" onchange="calcularTiemposVuelo()"></select>
   </div>
+  <div class="time-group">
+    <select id="airFinHora" class="time" onchange="calcularTiemposVuelo()"></select> :
+    <select id="airFinMin" class="time" onchange="calcularTiemposVuelo()"></select>
+  </div>
+
+  <div><label>Block Time</label><input id="blockComputed" readonly /></div>
+  <div><label>Air Time</label><input id="airComputed" readonly /></div>
 </div>
 
-<div class="bitacora-block">
-  <div>
-    <label>Air T/O</label>
-    <div class="time-group">
-      <select id="airInicioHora" class="time" onchange="calcularTiemposVuelo()"></select> :
-      <select id="airInicioMin" class="time" onchange="calcularTiemposVuelo()"></select>
-    </div>
-  </div>
-  <div>
-    <label>Air LDG</label>
-    <div class="time-group">
-      <select id="airFinHora" class="time" onchange="calcularTiemposVuelo()"></select> :
-      <select id="airFinMin" class="time" onchange="calcularTiemposVuelo()"></select>
-    </div>
-  </div>
-  <div>
-    <label>Air Time</label>
-    <input id="airComputed" readonly />
-  </div>
-</div>
+<style>
+.grid-bitacora {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+}
+.grid-bitacora .time-group {
+  display: flex;
+  gap: 4px;
+}
+.grid-bitacora input[readonly] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #eee;
+}
+</style>
 <!-- Selección de aeropuertos -->
 <label for="origen">Aeropuerto de Origen:</label>
 <select id="origen"></select>
