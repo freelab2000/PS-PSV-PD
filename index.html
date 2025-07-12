@@ -99,19 +99,13 @@
 <body>
 <h1>PSV/PS/PD</h1>
 
-<div class="grid-container">
+<!-- ORIGINAL A ELIMINAR -->
+<div class="bitacora-block">
   <div>
     <label>Block Out</label>
     <div class="time-group">
       <select id="blockInicioHora" class="time" onchange="calcularTiemposVuelo()"></select> :
       <select id="blockInicioMin" class="time" onchange="calcularTiemposVuelo()"></select>
-    </div>
-  </div>
-  <div>
-    <label>Air T/O</label>
-    <div class="time-group">
-      <select id="airInicioHora" class="time" onchange="calcularTiemposVuelo()"></select> :
-      <select id="airInicioMin" class="time" onchange="calcularTiemposVuelo()"></select>
     </div>
   </div>
   <div>
@@ -122,15 +116,25 @@
     </div>
   </div>
   <div>
+    <label>Block Time</label>
+    <input id="blockComputed" readonly />
+  </div>
+</div>
+
+<div class="bitacora-block">
+  <div>
+    <label>Air T/O</label>
+    <div class="time-group">
+      <select id="airInicioHora" class="time" onchange="calcularTiemposVuelo()"></select> :
+      <select id="airInicioMin" class="time" onchange="calcularTiemposVuelo()"></select>
+    </div>
+  </div>
+  <div>
     <label>Air LDG</label>
     <div class="time-group">
       <select id="airFinHora" class="time" onchange="calcularTiemposVuelo()"></select> :
       <select id="airFinMin" class="time" onchange="calcularTiemposVuelo()"></select>
     </div>
-  </div>
-  <div>
-    <label>Block Time</label>
-    <input id="blockComputed" readonly />
   </div>
   <div>
     <label>Air Time</label>
