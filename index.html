@@ -219,12 +219,52 @@ function obtenerDescansoDesdeTabla(duracion) {
 
 function calcularProximoInicioDinamico(bTime, bEnd) {
   let descanso = obtenerDescansoDesdeTabla(bTime);
-  let totalMin = bEnd + 30 + descanso;
+
+  // Obtener aeropuertos seleccionados
+  const origen = document.getElementById("origen").value;
+  const destino = document.getElementById("destino").value;
+
+  const aeropuertos = {
+    "CYHZ": -63.5, "CYJT": -58.55, "CYQM": -64.67, "CYQX": -54.57, "CYZX": -64.92,
+    "EBBR": 4.48, "EDDF": 8.57, "EHAM": 4.77, "EHRD": 4.43, "GCLP": -15.39,
+    "GCTS": -16.57, "GMMN": -7.59, "GOBD": -17.07, "GVAC": -22.60, "GVBA": -22.80,
+    "GVNP": -23.52, "GVSV": -25.05, "KBGR": -68.82, "KBOS": -71.01, "KFLL": -80.15,
+    "KJFK": -73.78, "KLAX": -118.41, "KMCO": -81.31, "KMIA": -80.29, "KPBI": -80.10,
+    "KRSW": -81.76, "LEMD": -3.57, "LEVD": -4.85, "LPAZ": -28.10, "LPLA": -28.33,
+    "LPPT": -9.14, "MPTO": -79.38, "MUHA": -82.41, "SACO": -64.21, "SAEZ": -58.53,
+    "SAME": -68.78, "SBGR": -46.47, "SBKP": -47.13, "SBRF": -34.91, "SCDA": -70.32,
+    "SCEL": -70.79, "SCFA": -70.43, "SCIE": -73.06, "SEGU": -79.88, "SEQM": -78.49,
+    "SKBO": -74.15, "SKCL": -76.38, "SKRG": -75.59, "SPHI": -79.83, "SPJC": -77.11
+  };
+
+  let extraRestMinutes = 0;
+  const geoRestInfoDiv = document.getElementById("geoRestInfo");
+  geoRestInfoDiv.innerHTML = ""; // Limpiar
+
+  if (origen in aeropuertos && destino in aeropuertos) {
+    const lon1 = aeropuertos[origen];
+    const lon2 = aeropuertos[destino];
+    const deltaLon = Math.abs(lon2 - lon1);
+
+    if (deltaLon > 45) {
+      extraRestMinutes = 120 + Math.floor((deltaLon - 45) / 15) * 30;
+      const horasExtra = Math.floor(extraRestMinutes / 60);
+      const minutosExtra = extraRestMinutes % 60;
+
+      geoRestInfoDiv.innerHTML =
+        `🌍 Se agregó <strong>+${horasExtra}h ${minutosExtra}min</strong> al período de descanso por cambio de longitud geográfica de <strong>${deltaLon.toFixed(1)}°</strong>.`;
+    }
+  }
+
+  // Cálculo final de descanso con incremento geográfico
+  let totalMin = bEnd + 30 + descanso + extraRestMinutes;
   let h = Math.floor((totalMin % 1440) / 60);
   let m = totalMin % 60;
-  const descansoTexto = `${Math.floor(descanso/60)}h ${("0"+(descanso%60)).slice(-2)}min`;
+  const descansoTotal = descanso + extraRestMinutes;
+  const descansoTexto = `${Math.floor(descansoTotal / 60)}h ${("0" + (descansoTotal % 60)).slice(-2)}min`;
+
   document.getElementById("proximoInicio").innerHTML =
-    "🕐 Próximo PSV permitido a partir de: <strong>" + ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2) + "</strong><br>🛌 Período de descanso requerido: <strong>" + descansoTexto + "</strong>";
+    "🕐 Próximo PSV permitido a partir de: <strong>" + ("0" + h).slice(-2) + ":" + ("0" + m).slice(-2) + "</strong><br>🛌 Período de descanso requerido: <strong>" + descansoTexto + "</strong>";
 }
 
 function validarRestriccionesHV(PSVmin, vueloMin, tripulacion, horaInicioPSV) {
