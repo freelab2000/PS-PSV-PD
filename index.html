@@ -270,6 +270,39 @@ function validarPSV() {
   const { bTime, bEnd } = calcularTiemposVuelo();
   calcularProximoInicioDinamico(bTime, bEnd);
   validarRestriccionesHV(duracion, bTime, tripulacion, inicio);
+  // Cálculo incremento por longitud geográfica
+const geoRestInfoDiv = document.getElementById("geoRestInfo");
+geoRestInfoDiv.innerHTML = ""; // Limpiar antes
+
+const origen = document.getElementById("origen").value;
+const destino = document.getElementById("destino").value;
+
+const aeropuertos = {
+  "CYHZ": -63.5, "CYJT": -58.55, "CYQM": -64.67, "CYQX": -54.57, "CYZX": -64.92,
+  "EBBR": 4.48, "EDDF": 8.57, "EHAM": 4.77, "EHRD": 4.43, "GCLP": -15.39,
+  "GCTS": -16.57, "GMMN": -7.59, "GOBD": -17.07, "GVAC": -22.60, "GVBA": -22.80,
+  "GVNP": -23.52, "GVSV": -25.05, "KBGR": -68.82, "KBOS": -71.01, "KFLL": -80.15,
+  "KJFK": -73.78, "KLAX": -118.41, "KMCO": -81.31, "KMIA": -80.29, "KPBI": -80.10,
+  "KRSW": -81.76, "LEMD": -3.57, "LEVD": -4.85, "LPAZ": -28.10, "LPLA": -28.33,
+  "LPPT": -9.14, "MPTO": -79.38, "MUHA": -82.41, "SACO": -64.21, "SAEZ": -58.53,
+  "SAME": -68.78, "SBGR": -46.47, "SBKP": -47.13, "SBRF": -34.91, "SCDA": -70.32,
+  "SCEL": -70.79, "SCFA": -70.43, "SCIE": -73.06, "SEGU": -79.88, "SEQM": -78.49,
+  "SKBO": -74.15, "SKCL": -76.38, "SKRG": -75.59, "SPHI": -79.83, "SPJC": -77.11
+};
+
+if (origen in aeropuertos && destino in aeropuertos) {
+  const lon1 = aeropuertos[origen];
+  const lon2 = aeropuertos[destino];
+  const deltaLon = Math.abs(lon2 - lon1);
+  
+  if (deltaLon > 45) {
+    const extraRestMinutes = 120 + Math.floor((deltaLon - 45) / 15) * 30;
+    const horasExtra = Math.floor(extraRestMinutes / 60);
+    const minutosExtra = extraRestMinutes % 60;
+
+    geoRestInfoDiv.innerHTML =
+      `🌍 Se agregó <strong>+${horasExtra}h ${minutosExtra}min</strong> al período de descanso por cambio de longitud geográfica de <strong>${deltaLon.toFixed(1)}°</strong>.`;
+  }
 }
 
 function cargarAeropuertos() {
