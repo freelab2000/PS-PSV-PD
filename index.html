@@ -238,7 +238,22 @@ function calcularProximoInicioDinamico(bTime, bEnd) {
   };
 
   let extraRestMinutes = 0;
-  
+  const geoRestInfoDiv = document.getElementById("geoRestInfo");
+  geoRestInfoDiv.innerHTML = ""; // Limpiar
+
+  if (origen in aeropuertos && destino in aeropuertos) {
+    const lon1 = aeropuertos[origen];
+    const lon2 = aeropuertos[destino];
+    const deltaLon = Math.abs(lon2 - lon1);
+
+    if (deltaLon > 45) {
+      extraRestMinutes = 120 + Math.floor((deltaLon - 45) / 15) * 30;
+      const horasExtra = Math.floor(extraRestMinutes / 60);
+      const minutosExtra = extraRestMinutes % 60;
+
+      geoRestInfoDiv.innerHTML =
+        `🌍 Se agregó <strong>+${horasExtra}h ${minutosExtra}min</strong> al período de descanso por cambio de longitud geográfica de <strong>${deltaLon.toFixed(1)}°</strong>.`;
+    }
   }
 
   // Cálculo final de descanso con incremento geográfico
