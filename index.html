@@ -216,14 +216,34 @@ function obtenerDescansoDesdeTabla(duracion) {
   return 1440;
 }
 
+function obtenerDiferenciaLongitud() {
+  const origen = document.getElementById("origen").value;
+  const destino = document.getElementById("destino").value;
+  const ao = aeropuertos.find(a => a.codigo === origen);
+  const ad = aeropuertos.find(a => a.codigo === destino);
+  if (!ao || !ad) return 0;
+  return Math.abs(ao.long - ad.long);
+}
+
 function calcularProximoInicioDinamico(bTime, bEnd) {
   let descanso = obtenerDescansoDesdeTabla(bTime);
+
+  const deltaLon = obtenerDiferenciaLongitud();
+  let ajuste = 0;
+
+  if (deltaLon > 45) {
+    ajuste = 120 + Math.floor((deltaLon - 45) / 15) * 30;
+    descanso += ajuste;
+  }
+
   let totalMin = bEnd + 30 + descanso;
   let h = Math.floor((totalMin % 1440) / 60);
   let m = totalMin % 60;
   const descansoTexto = `${Math.floor(descanso/60)}h ${("0"+(descanso%60)).slice(-2)}min`;
+  const ajusteTexto = ajuste > 0 ? ` (+${Math.floor(ajuste/60)}h ${("0"+(ajuste%60)).slice(-2)}min por ΔLON ${deltaLon.toFixed(1)}°)` : "";
+
   document.getElementById("proximoInicio").innerHTML =
-    "🕐 Próximo PSV permitido a partir de: <strong>" + ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2) + "</strong><br>🛌 Período de descanso requerido: <strong>" + descansoTexto + "</strong>";
+    "🕐 Próximo PSV permitido a partir de: <strong>" + ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2) + "</strong><br>🛌 Período de descanso requerido: <strong>" + descansoTexto + "</strong>" + ajusteTexto;
 }
 
 function validarRestriccionesHV(PSVmin, vueloMin, tripulacion, horaInicioPSV) {
@@ -271,35 +291,60 @@ function validarPSV() {
   validarRestriccionesHV(duracion, bTime, tripulacion, inicio);
 }
 
-function cargarAeropuertos() {
-  const aeropuertos = [
-    { codigo: "CYHZ", nombre: "Halifax" }, { codigo: "CYJT", nombre: "Stephenville" },
-    { codigo: "CYQM", nombre: "Moncton" }, { codigo: "CYQX", nombre: "Gander" },
-    { codigo: "CYZX", nombre: "Greenwood" }, { codigo: "EBBR", nombre: "Bruselas" },
-    { codigo: "EDDF", nombre: "Frankfurt" }, { codigo: "EHAM", nombre: "Amsterdam" },
-    { codigo: "EHRD", nombre: "Rotterdam" }, { codigo: "GCLP", nombre: "Gran Canaria" },
-    { codigo: "GCTS", nombre: "Tenerife Sur" }, { codigo: "GMMN", nombre: "Casablanca" },
-    { codigo: "GOBD", nombre: "Dakar" }, { codigo: "GVAC", nombre: "Sal" },
-    { codigo: "GVBA", nombre: "Boa Vista" }, { codigo: "GVNP", nombre: "Praia" },
-    { codigo: "GVSV", nombre: "São Vicente" }, { codigo: "KBGR", nombre: "Bangor" },
-    { codigo: "KBOS", nombre: "Boston" }, { codigo: "KFLL", nombre: "Fort Lauderdale" },
-    { codigo: "KJFK", nombre: "New York" }, { codigo: "KLAX", nombre: "Los Angeles" },
-    { codigo: "KMCO", nombre: "Orlando" }, { codigo: "KMIA", nombre: "Miami" },
-    { codigo: "KPBI", nombre: "Palm Beach" }, { codigo: "KRSW", nombre: "Fort Myers" },
-    { codigo: "LEMD", nombre: "Madrid" }, { codigo: "LEVD", nombre: "Valladolid" },
-    { codigo: "LPAZ", nombre: "Santa Maria" }, { codigo: "LPLA", nombre: "Lajes" },
-    { codigo: "LPPT", nombre: "Lisboa" }, { codigo: "MPTO", nombre: "Panamá" },
-    { codigo: "MUHA", nombre: "La Habana" }, { codigo: "SACO", nombre: "Córdoba" },
-    { codigo: "SAEZ", nombre: "Buenos Aires" }, { codigo: "SAME", nombre: "Mendoza" },
-    { codigo: "SBGR", nombre: "Sao Paulo" }, { codigo: "SBKP", nombre: "Campinas" },
-    { codigo: "SBRF", nombre: "Recife" }, { codigo: "SCDA", nombre: "Iquique" },
-    { codigo: "SCEL", nombre: "Santiago" }, { codigo: "SCFA", nombre: "Antofagasta" },
-    { codigo: "SCIE", nombre: "Concepción" }, { codigo: "SEGU", nombre: "Guayaquil" },
-    { codigo: "SEQM", nombre: "Quito" }, { codigo: "SKBO", nombre: "Bogotá" },
-    { codigo: "SKCL", nombre: "Cali" }, { codigo: "SKRG", nombre: "Medellín" },
-    { codigo: "SPHI", nombre: "Chiclayo" }, { codigo: "SPJC", nombre: "Lima" }
-  ];
+const aeropuertos = [
+  { codigo: "CYHZ", nombre: "Halifax", long: -63.5 },
+  { codigo: "CYJT", nombre: "Stephenville", long: -58.6 },
+  { codigo: "CYQM", nombre: "Moncton", long: -64.7 },
+  { codigo: "CYQX", nombre: "Gander", long: -54.6 },
+  { codigo: "CYZX", nombre: "Greenwood", long: -64.9 },
+  { codigo: "EBBR", nombre: "Bruselas", long: 4.5 },
+  { codigo: "EDDF", nombre: "Frankfurt", long: 8.6 },
+  { codigo: "EHAM", nombre: "Amsterdam", long: 4.8 },
+  { codigo: "EHRD", nombre: "Rotterdam", long: 4.4 },
+  { codigo: "GCLP", nombre: "Gran Canaria", long: -15.4 },
+  { codigo: "GCTS", nombre: "Tenerife Sur", long: -16.6 },
+  { codigo: "GMMN", nombre: "Casablanca", long: -7.6 },
+  { codigo: "GOBD", nombre: "Dakar", long: -17.1 },
+  { codigo: "GVAC", nombre: "Sal", long: -22.9 },
+  { codigo: "GVBA", nombre: "Boa Vista", long: -22.8 },
+  { codigo: "GVNP", nombre: "Praia", long: -23.5 },
+  { codigo: "GVSV", nombre: "São Vicente", long: -25.0 },
+  { codigo: "KBGR", nombre: "Bangor", long: -68.8 },
+  { codigo: "KBOS", nombre: "Boston", long: -71.0 },
+  { codigo: "KFLL", nombre: "Fort Lauderdale", long: -80.1 },
+  { codigo: "KJFK", nombre: "New York", long: -73.8 },
+  { codigo: "KLAX", nombre: "Los Angeles", long: -118.4 },
+  { codigo: "KMCO", nombre: "Orlando", long: -81.3 },
+  { codigo: "KMIA", nombre: "Miami", long: -80.3 },
+  { codigo: "KPBI", nombre: "Palm Beach", long: -80.1 },
+  { codigo: "KRSW", nombre: "Fort Myers", long: -81.8 },
+  { codigo: "LEMD", nombre: "Madrid", long: -3.6 },
+  { codigo: "LEVD", nombre: "Valladolid", long: -4.8 },
+  { codigo: "LPAZ", nombre: "Santa Maria", long: -28.1 },
+  { codigo: "LPLA", nombre: "Lajes", long: -27.1 },
+  { codigo: "LPPT", nombre: "Lisboa", long: -9.1 },
+  { codigo: "MPTO", nombre: "Panamá", long: -79.4 },
+  { codigo: "MUHA", nombre: "La Habana", long: -82.4 },
+  { codigo: "SACO", nombre: "Córdoba", long: -64.2 },
+  { codigo: "SAEZ", nombre: "Buenos Aires", long: -58.5 },
+  { codigo: "SAME", nombre: "Mendoza", long: -68.8 },
+  { codigo: "SBGR", nombre: "Sao Paulo", long: -46.5 },
+  { codigo: "SBKP", nombre: "Campinas", long: -47.1 },
+  { codigo: "SBRF", nombre: "Recife", long: -34.9 },
+  { codigo: "SCDA", nombre: "Iquique", long: -70.2 },
+  { codigo: "SCEL", nombre: "Santiago", long: -70.8 },
+  { codigo: "SCFA", nombre: "Antofagasta", long: -70.4 },
+  { codigo: "SCIE", nombre: "Concepción", long: -73.0 },
+  { codigo: "SEGU", nombre: "Guayaquil", long: -79.9 },
+  { codigo: "SEQM", nombre: "Quito", long: -78.5 },
+  { codigo: "SKBO", nombre: "Bogotá", long: -74.1 },
+  { codigo: "SKCL", nombre: "Cali", long: -76.4 },
+  { codigo: "SKRG", nombre: "Medellín", long: -75.4 },
+  { codigo: "SPHI", nombre: "Chiclayo", long: -79.9 },
+  { codigo: "SPJC", nombre: "Lima", long: -77.1 }
+];
 
+function cargarAeropuertos() {
   const origen = document.getElementById("origen");
   const destino = document.getElementById("destino");
   aeropuertos.forEach(a => {
