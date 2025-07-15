@@ -79,15 +79,26 @@
       flex: 1;
     }
     .output-fields {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    input[readonly] {
-      background: #f0f0f0;
-      text-align: center;
-      font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px; /* más separación entre celdas */
+  margin-top: 14px;
+}
+
+.output-fields .column {
+  flex: 1;
+}
+
+input[readonly] {
+  background: #eef4fb;         /* color más suave */
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid #b3cce6;   /* borde definido */
+  border-radius: 10px;
+  padding: 10px 0;
+  font-size: 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
     }
     @media (max-width: 600px) {
       .row-group {
