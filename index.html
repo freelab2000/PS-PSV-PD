@@ -96,33 +96,6 @@
       .output-fields {
         flex-direction: column;
       }
-      .result-pair {
-  display: flex;
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.result-card {
-  flex: 1;
-  background: #e8f0fe;
-  border-radius: 10px;
-  padding: 12px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
-  border-left: 5px solid #004080;
-}
-
-.result-card label {
-  font-weight: 600;
-  color: #004080;
-  margin-bottom: 4px;
-  display: block;
-}
-
-.result-value {
-  font-size: 20px;
-  font-weight: bold;
-  color: #1a1a1a;
-}
     }
   </style>
 </head>
@@ -162,16 +135,16 @@
     </div>
   </div>
 
- <div class="result-pair">
-  <div class="result-card">
-    <label>Block Time</label>
-    <div id="blockComputed" class="result-value">--</div>
+  <div class="output-fields">
+    <div class="column">
+      <label>Block Time</label>
+      <input id="blockComputed" readonly />
+    </div>
+    <div class="column">
+      <label>Air Time</label>
+      <input id="airComputed" readonly />
+    </div>
   </div>
-  <div class="result-card">
-    <label>Air Time</label>
-    <div id="airComputed" class="result-value">--</div>
-  </div>
-</div>
 
   <label for="origen">Aeropuerto de Origen:</label>
   <select id="origen"></select>
