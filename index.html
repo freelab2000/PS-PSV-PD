@@ -281,13 +281,18 @@ function validarRestriccionesHV(PSVmin, vueloMin, tripulacion, horaInicioPSV) {
     mensajes.push("✅ PSV dentro de límite");
   }
 
+  // ⚠️ PSV nocturno para tripulación de 2 pilotos
   if (tripulacion == 2 && (horaInicioPSV >= 1260 || horaInicioPSV < 360)) {
     mensajes.push("⚠️ PSV nocturno detectado entre 21:00 y 06:00. No se permite extensión.");
   }
 
+  // ⚠️ Advertencia reglamentaria por PSV corto ≤ 7h
+  if (PSVmin <= 420) {
+    mensajes.push("⚠️ PSV igual o inferior a 7h. No puede planificarse otro vuelo dentro de 24h desde el inicio, salvo que el total entre el inicio del primero y término del segundo no exceda 12h.");
+  }
+
   document.getElementById("validaciones").innerHTML = mensajes.join("<br>");
 }
-
 function validarPSV() {
   const tripulacion = parseInt(document.getElementById("tripulacion").value || 2);
   const iniHora = parseInt(document.getElementById("inicioHora").value || 0);
