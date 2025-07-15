@@ -225,25 +225,36 @@ function obtenerDiferenciaLongitud() {
   return Math.abs(ao.long - ad.long);
 }
 
-function calcularProximoInicioDinamico(bTime, bEnd) {
-  let descanso = obtenerDescansoDesdeTabla(bTime);
+function calcularProximoInicioDinamico() {
+  const iniHora = parseInt(document.getElementById("inicioHora").value || 0);
+  const iniMin = parseInt(document.getElementById("inicioMin").value || 0);
+  const finHora = parseInt(document.getElementById("finHora").value || 0);
+  const finMin = parseInt(document.getElementById("finMin").value || 0);
+
+  let inicioPSV = iniHora * 60 + iniMin;
+  let finPSV = finHora * 60 + finMin;
+  if (finPSV < inicioPSV) finPSV += 1440;
+
+  let duracionPSV = finPSV - inicioPSV;
+
+  let descanso = obtenerDescansoDesdeTabla(duracionPSV);
 
   const deltaLon = obtenerDiferenciaLongitud();
   let ajuste = 0;
-
   if (deltaLon > 45) {
     ajuste = 120 + Math.floor((deltaLon - 45) / 15) * 30;
     descanso += ajuste;
   }
 
-  let totalMin = bEnd + 30 + descanso;
-  let h = Math.floor((totalMin % 1440) / 60);
-  let m = totalMin % 60;
-  const descansoTexto = `${Math.floor(descanso/60)}h ${("0"+(descanso%60)).slice(-2)}min`;
-  const ajusteTexto = ajuste > 0 ? ` (+${Math.floor(ajuste/60)}h ${("0"+(ajuste%60)).slice(-2)}min por ΔLON ${deltaLon.toFixed(1)}°)` : "";
+  const totalMin = finPSV + 30 + descanso;
+  const h = Math.floor((totalMin % 1440) / 60);
+  const m = totalMin % 60;
+
+  const descansoTexto = `${Math.floor(descanso / 60)}h ${("0" + (descanso % 60)).slice(-2)}min`;
+  const ajusteTexto = ajuste > 0 ? ` (+${Math.floor(ajuste / 60)}h ${("0" + (ajuste % 60)).slice(-2)}min por ΔLON ${deltaLon.toFixed(1)}°)` : "";
 
   document.getElementById("proximoInicio").innerHTML =
-    "🕐 Próximo PSV permitido a partir de: <strong>" + ("0"+h).slice(-2) + ":" + ("0"+m).slice(-2) + "</strong><br>🛌 Período de descanso requerido: <strong>" + descansoTexto + "</strong>" + ajusteTexto;
+    "🕐 Próximo PSV permitido a partir de: <strong>" + ("0" + h).slice(-2) + ":" + ("0" + m).slice(-2) + "</strong><br>🛌 Período de descanso requerido: <strong>" + descansoTexto + "</strong>" + ajusteTexto;
 }
 
 function validarRestriccionesHV(PSVmin, vueloMin, tripulacion, horaInicioPSV) {
@@ -286,62 +297,37 @@ function validarPSV() {
   if (fin < inicio) fin += 1440;
   let duracion = fin - inicio;
 
-  const { bTime, bEnd } = calcularTiemposVuelo();
-  calcularProximoInicioDinamico(bTime, bEnd);
+  const { bTime } = calcularTiemposVuelo();
+  calcularProximoInicioDinamico();
   validarRestriccionesHV(duracion, bTime, tripulacion, inicio);
 }
 
 const aeropuertos = [
-  { codigo: "CYHZ", nombre: "Halifax", long: -63.5 },
-  { codigo: "CYJT", nombre: "Stephenville", long: -58.6 },
-  { codigo: "CYQM", nombre: "Moncton", long: -64.7 },
-  { codigo: "CYQX", nombre: "Gander", long: -54.6 },
-  { codigo: "CYZX", nombre: "Greenwood", long: -64.9 },
-  { codigo: "EBBR", nombre: "Bruselas", long: 4.5 },
-  { codigo: "EDDF", nombre: "Frankfurt", long: 8.6 },
-  { codigo: "EHAM", nombre: "Amsterdam", long: 4.8 },
-  { codigo: "EHRD", nombre: "Rotterdam", long: 4.4 },
-  { codigo: "GCLP", nombre: "Gran Canaria", long: -15.4 },
-  { codigo: "GCTS", nombre: "Tenerife Sur", long: -16.6 },
-  { codigo: "GMMN", nombre: "Casablanca", long: -7.6 },
-  { codigo: "GOBD", nombre: "Dakar", long: -17.1 },
-  { codigo: "GVAC", nombre: "Sal", long: -22.9 },
-  { codigo: "GVBA", nombre: "Boa Vista", long: -22.8 },
-  { codigo: "GVNP", nombre: "Praia", long: -23.5 },
-  { codigo: "GVSV", nombre: "São Vicente", long: -25.0 },
-  { codigo: "KBGR", nombre: "Bangor", long: -68.8 },
-  { codigo: "KBOS", nombre: "Boston", long: -71.0 },
-  { codigo: "KFLL", nombre: "Fort Lauderdale", long: -80.1 },
-  { codigo: "KJFK", nombre: "New York", long: -73.8 },
-  { codigo: "KLAX", nombre: "Los Angeles", long: -118.4 },
-  { codigo: "KMCO", nombre: "Orlando", long: -81.3 },
-  { codigo: "KMIA", nombre: "Miami", long: -80.3 },
-  { codigo: "KPBI", nombre: "Palm Beach", long: -80.1 },
-  { codigo: "KRSW", nombre: "Fort Myers", long: -81.8 },
-  { codigo: "LEMD", nombre: "Madrid", long: -3.6 },
-  { codigo: "LEVD", nombre: "Valladolid", long: -4.8 },
-  { codigo: "LPAZ", nombre: "Santa Maria", long: -28.1 },
-  { codigo: "LPLA", nombre: "Lajes", long: -27.1 },
-  { codigo: "LPPT", nombre: "Lisboa", long: -9.1 },
-  { codigo: "MPTO", nombre: "Panamá", long: -79.4 },
-  { codigo: "MUHA", nombre: "La Habana", long: -82.4 },
-  { codigo: "SACO", nombre: "Córdoba", long: -64.2 },
-  { codigo: "SAEZ", nombre: "Buenos Aires", long: -58.5 },
-  { codigo: "SAME", nombre: "Mendoza", long: -68.8 },
-  { codigo: "SBGR", nombre: "Sao Paulo", long: -46.5 },
-  { codigo: "SBKP", nombre: "Campinas", long: -47.1 },
-  { codigo: "SBRF", nombre: "Recife", long: -34.9 },
-  { codigo: "SCDA", nombre: "Iquique", long: -70.2 },
-  { codigo: "SCEL", nombre: "Santiago", long: -70.8 },
-  { codigo: "SCFA", nombre: "Antofagasta", long: -70.4 },
-  { codigo: "SCIE", nombre: "Concepción", long: -73.0 },
-  { codigo: "SEGU", nombre: "Guayaquil", long: -79.9 },
-  { codigo: "SEQM", nombre: "Quito", long: -78.5 },
-  { codigo: "SKBO", nombre: "Bogotá", long: -74.1 },
-  { codigo: "SKCL", nombre: "Cali", long: -76.4 },
-  { codigo: "SKRG", nombre: "Medellín", long: -75.4 },
-  { codigo: "SPHI", nombre: "Chiclayo", long: -79.9 },
-  { codigo: "SPJC", nombre: "Lima", long: -77.1 }
+  { codigo: "CYHZ", nombre: "Halifax", long: -63.5 }, { codigo: "CYJT", nombre: "Stephenville", long: -58.6 },
+  { codigo: "CYQM", nombre: "Moncton", long: -64.7 }, { codigo: "CYQX", nombre: "Gander", long: -54.6 },
+  { codigo: "CYZX", nombre: "Greenwood", long: -64.9 }, { codigo: "EBBR", nombre: "Bruselas", long: 4.5 },
+  { codigo: "EDDF", nombre: "Frankfurt", long: 8.6 }, { codigo: "EHAM", nombre: "Amsterdam", long: 4.8 },
+  { codigo: "EHRD", nombre: "Rotterdam", long: 4.4 }, { codigo: "GCLP", nombre: "Gran Canaria", long: -15.4 },
+  { codigo: "GCTS", nombre: "Tenerife Sur", long: -16.6 }, { codigo: "GMMN", nombre: "Casablanca", long: -7.6 },
+  { codigo: "GOBD", nombre: "Dakar", long: -17.1 }, { codigo: "GVAC", nombre: "Sal", long: -22.9 },
+  { codigo: "GVBA", nombre: "Boa Vista", long: -22.8 }, { codigo: "GVNP", nombre: "Praia", long: -23.5 },
+  { codigo: "GVSV", nombre: "São Vicente", long: -25.0 }, { codigo: "KBGR", nombre: "Bangor", long: -68.8 },
+  { codigo: "KBOS", nombre: "Boston", long: -71.0 }, { codigo: "KFLL", nombre: "Fort Lauderdale", long: -80.1 },
+  { codigo: "KJFK", nombre: "New York", long: -73.8 }, { codigo: "KLAX", nombre: "Los Angeles", long: -118.4 },
+  { codigo: "KMCO", nombre: "Orlando", long: -81.3 }, { codigo: "KMIA", nombre: "Miami", long: -80.3 },
+  { codigo: "KPBI", nombre: "Palm Beach", long: -80.1 }, { codigo: "KRSW", nombre: "Fort Myers", long: -81.8 },
+  { codigo: "LEMD", nombre: "Madrid", long: -3.6 }, { codigo: "LEVD", nombre: "Valladolid", long: -4.8 },
+  { codigo: "LPAZ", nombre: "Santa Maria", long: -28.1 }, { codigo: "LPLA", nombre: "Lajes", long: -27.1 },
+  { codigo: "LPPT", nombre: "Lisboa", long: -9.1 }, { codigo: "MPTO", nombre: "Panamá", long: -79.4 },
+  { codigo: "MUHA", nombre: "La Habana", long: -82.4 }, { codigo: "SACO", nombre: "Córdoba", long: -64.2 },
+  { codigo: "SAEZ", nombre: "Buenos Aires", long: -58.5 }, { codigo: "SAME", nombre: "Mendoza", long: -68.8 },
+  { codigo: "SBGR", nombre: "Sao Paulo", long: -46.5 }, { codigo: "SBKP", nombre: "Campinas", long: -47.1 },
+  { codigo: "SBRF", nombre: "Recife", long: -34.9 }, { codigo: "SCDA", nombre: "Iquique", long: -70.2 },
+  { codigo: "SCEL", nombre: "Santiago", long: -70.8 }, { codigo: "SCFA", nombre: "Antofagasta", long: -70.4 },
+  { codigo: "SCIE", nombre: "Concepción", long: -73.0 }, { codigo: "SEGU", nombre: "Guayaquil", long: -79.9 },
+  { codigo: "SEQM", nombre: "Quito", long: -78.5 }, { codigo: "SKBO", nombre: "Bogotá", long: -74.1 },
+  { codigo: "SKCL", nombre: "Cali", long: -76.4 }, { codigo: "SKRG", nombre: "Medellín", long: -75.4 },
+  { codigo: "SPHI", nombre: "Chiclayo", long: -79.9 }, { codigo: "SPJC", nombre: "Lima", long: -77.1 }
 ];
 
 function cargarAeropuertos() {
@@ -367,5 +353,3 @@ window.onload = () => {
   }
 };
 </script>
-</body>
-</html>
