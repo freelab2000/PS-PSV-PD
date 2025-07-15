@@ -245,7 +245,7 @@ function calcularProximoInicioDinamico() {
     descanso += ajuste;
   }
 
-  const totalMin = finPSV + 30 + descanso;
+  const totalMin = finPSV + descanso;
   const h = Math.floor((totalMin % 1440) / 60);
   const m = totalMin % 60;
 
