@@ -174,9 +174,12 @@
   <button onclick="validarPSV()">Validar</button>
 
   <div class="resultado" id="resultado">
-    <div id="proximoInicio" class="info" style="margin-top:10px;"></div>
-    <div id="validaciones" class="info" style="margin-top:10px;"></div>
-  </div>
+  <div id="proximoInicio" class="info" style="margin-top:10px;"></div>
+  <p style="font-size: 14px; margin-top: 8px; color: #444;">
+    ⚠️ <strong>Recuerda sumar 30 min posterior al término de tu PSV</strong>
+  </p>
+  <div id="validaciones" class="info" style="margin-top:10px;"></div>
+</div>
 <script>
 function calcularTiemposVuelo() {
   const getMins = (hId, mId) => parseInt(document.getElementById(hId).value || 0) * 60 + parseInt(document.getElementById(mId).value || 0);
