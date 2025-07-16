@@ -121,14 +121,14 @@ input[readonly] {
   <h1>PSV/PS/PD</h1>
   <div class="row-group">
     <div class="column">
-      <label>Block Out</label>
+      <label>🟢 Block Out</label>
       <div class="time-group">
         <select id="blockInicioHora" class="time" onchange="calcularTiemposVuelo()"></select> :
         <select id="blockInicioMin" class="time" onchange="calcularTiemposVuelo()"></select>
       </div>
     </div>
     <div class="column">
-      <label>Air T/O</label>
+      <label>✈️ Air T/O</label>
       <div class="time-group">
         <select id="airInicioHora" class="time" onchange="calcularTiemposVuelo()"></select> :
         <select id="airInicioMin" class="time" onchange="calcularTiemposVuelo()"></select>
@@ -138,14 +138,14 @@ input[readonly] {
 
   <div class="row-group">
     <div class="column">
-      <label>Block In</label>
+      <label>🔴 Block In</label>
       <div class="time-group">
         <select id="blockFinHora" class="time" onchange="calcularTiemposVuelo()"></select> :
         <select id="blockFinMin" class="time" onchange="calcularTiemposVuelo()"></select>
       </div>
     </div>
     <div class="column">
-      <label>Air LDG</label>
+      <label>🛬 Air LDG</label>
       <div class="time-group">
         <select id="airFinHora" class="time" onchange="calcularTiemposVuelo()"></select> :
         <select id="airFinMin" class="time" onchange="calcularTiemposVuelo()"></select>
@@ -155,28 +155,28 @@ input[readonly] {
 
   <div class="output-fields">
     <div class="column">
-      <label>Block Time</label>
+      <label>⏱️ Block Time</label>
       <input id="blockComputed" readonly />
     </div>
     <div class="column">
-      <label>Air Time</label>
+      <label>🕑 Air Time</label>
       <input id="airComputed" readonly />
     </div>
   </div>
 
-  <label for="origen">Aeropuerto de Origen:</label>
+  <label for="origen">📍 Aeropuerto de Origen:</label>
   <select id="origen"></select>
 
-  <label for="destino">Aeropuerto de Destino:</label>
+  <label for="destino">📍 Aeropuerto de Destino:</label>
   <select id="destino"></select>
 
-  <label>Inicio PSV:</label>
+  <label>🕒 Inicio PSV:</label>
   <div class="time-group">
     <select id="inicioHora" class="time"></select> :
     <select id="inicioMin" class="time"></select>
   </div>
 
-  <label>Término PSV:</label>
+  <label>🛑 Término PSV:</label>
   <div class="time-group">
     <select id="finHora" class="time"></select> :
     <select id="finMin" class="time"></select>
