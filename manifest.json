@@ -1,7 +1,7 @@
 {
   "name": "Validación PSV / PD / HV",
   "short_name": "PSV-PD-HV",
-  "start_url": "index.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#f2f2f2",
   "theme_color": "#004080",
