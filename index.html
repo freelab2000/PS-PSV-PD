@@ -104,18 +104,16 @@ select:not(.time) {
   max-width: 100px;
 }
     }
-    @media (max-width: 600px) {
-      .row-group {
-        flex-direction: column;
-      }
-      .output-fields {
-        flex-direction: column;
-      }
-      .output-fields input[readonly] {
-  width: 100%;
-  box-sizing: border-box;
+   @media (max-width: 600px) {
+  .row-group,
+  .output-fields {
+    flex-direction: row; /* mantiene mismo diseño que PC */
+    gap: 20px;
+  }
+  .output-fields input[readonly] {
+    width: 180px;
+  }
 }
-    }
   </style>
 </head>
 <body>
